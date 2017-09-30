@@ -1,0 +1,51 @@
+#
+# Automatically generated make config: don't edit
+# Sat Sep 30 15:48:05 2017
+#
+HAVE_DOT_CONFIG=y
+CONFIG_PROJECT="myproject"
+CONFIG_SRC_URI_HOST="https://www.github.com/emagii"
+CONFIG_SRC_URI_REPO=""
+CONFIG_WORKDIR="${HOME}/projects/autotooler"
+CONFIG_PROJECT_TYPE="library"
+# CONFIG_PROGRAM is not set
+CONFIG_SHARED_LIB=y
+# CONFIG_STATIC_LIB is not set
+CONFIG_LIBRARY=y
+
+#
+# Library Setup
+#
+CONFIG_LIBRARY_NAME="lib<x>"
+CONFIG_LIBRARY_VERSION="1.0"
+CONFIG_COPYRIGHT_DATE="2017"
+CONFIG_AUTHOR="Ulf Samuelsson"
+CONFIG_AUTHOR_EMAIL="ulf@emagii.com"
+CONFIG_HOMEPAGE="http://www.emagii.com/"
+CONFIG_AC_PRERQ="2.59"
+CONFIG_AC_CONFIG_HEADER="src/include/config.h"
+CONFIG_AC_CONFIG_MACRO_DIR="m4"
+CONFIG_AM_INIT_AUTOMAKE="1.10 -Wall no-define"
+CONFIG_SRCDIR="src"
+
+#
+# Linker Libraries
+#
+# CONFIG_BOOST is not set
+# CONFIG_CURL is not set
+# CONFIG_OPENSSL is not set
+# CONFIG_PTHREAD is not set
+# CONFIG_CURLPP is not set
+
+#
+# Options
+#
+# CONFIG_OS_ANDROID is not set
+# CONFIG_OS_IOS is not set
+CONFIG_OS_LINUX=y
+# CONFIG_OS_MAC_X is not set
+# CONFIG_OS_WINDOWS is not set
+# CONFIG_OS_OTHER is not set
+CONFIG_OS="Linux"
+# CONFIG_DEBUG is not set
+# CONFIG_EXAMPLES is not set
