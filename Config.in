@@ -103,7 +103,7 @@ config	CONFIG_AC_PRERQ
 
 config	CONFIG_AC_CONFIG_HEADER
 	string "AC_INIT Header (config.h)"
-	default	"src/include/config.h"
+	default	"src/user/config.h"
 
 config	CONFIG_AC_CONFIG_MACRO_DIR
 	string "AC_CONFIG_MACRO_DIR (m4)"
