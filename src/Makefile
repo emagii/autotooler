@@ -31,6 +31,7 @@ user-headers.inc:	user/user-headers.inc
 am:	Makefile.am
 
 Makefile.am:	Makefile_am
+	./Makefile_am
 
 Makefile_am:	Makefile_am.c	autoconf.h fileinfo
 	${CC}	${CFLAGS} -o $@	Makefile_am.c
