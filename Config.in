@@ -128,11 +128,7 @@ config	CONFIG_PTHREAD
 source	"user/user-libs.inc"
 endmenu
 
-menu	"Options"
-
-choice	CONFIG_OS_SELECTION
-	prompt	"OS Selection"
-	default	CONFIG_OS_LINUX
+menu	"OS Options"
 
 config	CONFIG_OS_ANDROID
 	bool	"Android"
@@ -152,16 +148,16 @@ config	CONFIG_OS_WINDOWS
 config	CONFIG_OS_OTHER
 	bool	"other"
 
-endchoice
+endmenu
 
-config	CONFIG_OS
-	string
-	default	"Android"	if CONFIG_OS_ANDROID
-	default	"iOS"		if CONFIG_OS_IOS
-	default	"Linux"		if CONFIG_OS_LINUX
-	default	"Mac OS X"	if CONFIG_OS_MAC_X
-	default	"Windows"	if CONFIG_OS_WINDOWS
-	default	"other"		if CONFIG_OS_OTHER
+#config	CONFIG_OS
+#	string
+#	default	"Android"	if CONFIG_OS_ANDROID
+#	default	"iOS"		if CONFIG_OS_IOS
+#	default	"Linux"		if CONFIG_OS_LINUX
+#	default	"Mac OS X"	if CONFIG_OS_MAC_X
+#	default	"Windows"	if CONFIG_OS_WINDOWS
+#	default	"other"		if CONFIG_OS_OTHER
 
 config	CONFIG_DEBUG
 	bool	"debug"
