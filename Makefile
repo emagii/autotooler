@@ -22,7 +22,8 @@ VERSION := 0.1
 REVISION := 1
 
 noconfig_targets:= menuconfig defconfig $(CONFIG) oldconfig
-
+HOSTCC=$(which gcc)
+HOSTCC=gcc
 # Check first if we want to configure Autotooler
 #
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
@@ -38,14 +39,14 @@ all: menuconfig
 
 $(CONFIG)/conf:
 	@mkdir -p $(CONFIG)/autotooler-config
-	$(MAKE) CC="$(HOSTCC)" -C $(CONFIG) conf
+	$(MAKE) HOSTCC="$(HOSTCC)" -C $(CONFIG) conf
 	-@if [ ! -f .config ]; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
 
 $(CONFIG)/mconf:
 	@mkdir -p $(CONFIG)/autotooler-config
-	$(MAKE) CC="$(HOSTCC)" -C $(CONFIG) conf mconf
+	$(MAKE) HOSTCC="$(HOSTCC)" -C $(CONFIG) conf mconf
 	-@if [ ! -f .config ]; then \
 		cp $(CONFIG_DEFCONFIG) .config; \
 	fi
@@ -83,6 +84,7 @@ CROSS_COMPILE=
 
 AS=gcc
 CC=gcc
+cc=gcc
 LD=ld
 NM=nm
 SIZE=size
@@ -109,8 +111,8 @@ endif  # HAVE_DOT_CONFIG
 PHONY+= rebuild
 
 %_defconfig:
-	echo $(shell find ./lib/ -name $@)
-	cp $(shell find ./lib/ -name $@) .config
+	echo $(shell find ./user/ -name $@)
+	cp $(shell find ./user/ -name $@) .config
 	@$(MAKE) oldconfig
 
 update:

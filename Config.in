@@ -80,7 +80,7 @@ config	CONFIG_COPYRIGHT_DATE
 	default "2017"
 	
 config	CONFIG_AUTHOR
-	string "Author Familyname <author@domain.com>"
+	string "Author Name"
 	default	"Ulf Samuelsson"
 
 config	CONFIG_AUTHOR_EMAIL
@@ -113,16 +113,19 @@ config	CONFIG_SRCDIR
 
 menu "Linker Libraries"
 
+config	CONFIG_BOOST
+	bool	"Boost Library"
+
+config	CONFIG_CURL
+	bool	"cURL"
+
 config	CONFIG_OPENSSL
 	bool	"OpenSSL"
 
 config	CONFIG_PTHREAD
 	bool	"PThread"
 
-config	CONFIG_CURLPP
-	bool	"cURLPP"
-
-
+source	"user/user-libs.inc"
 endmenu
 
 menu	"Options"
@@ -159,14 +162,6 @@ config	CONFIG_OS
 	default	"Mac OS X"	if CONFIG_OS_MAC_X
 	default	"Windows"	if CONFIG_OS_WINDOWS
 	default	"other"		if CONFIG_OS_OTHER
-
-config	CONFIG_EXAMPLES
-	bool	"Examples"
-
-config	CONFIG_EXAMPLES_VAR
-	depends	on CONFIG_EXAMPLES
-	string	"examples	--enable-<var>"
-	default	"examples"
 
 config	CONFIG_DEBUG
 	bool	"debug"
