@@ -269,7 +269,7 @@ getcwd(path, MAX_PATH_LENGTH);
 printf("Current Directory = %s", path);
 #endif
 
-int	main(int argc, char **argv)
+void	configure_ac(void)
 {
 	c_ac	= fopen("configure.ac", "w");
 	if (c_ac == NULL) {
@@ -297,6 +297,12 @@ int	main(int argc, char **argv)
 #endif
 	ac_simple("AC_PROG_LIBTOOL");
 	ac_simple("AC_HEADER_STDC");
+
+	ac_simple("AC_C_CONST");
+	ac_simple("AC_TYPE_SIZE_T");
+	ac_simple("AC_HEADER_TIME");
+	ac_simple("");
+
 	newline();
 	ac_check_headers(CHECK_HEADERS_FILE);
 
@@ -348,8 +354,14 @@ int	main(int argc, char **argv)
 
 #include "user-code.inc"
 
-	ac_simple("AC_SUBST([CFLAGS])");
+	ac_config("AC_SUBST",		"CFLAGS");
+	ac_config("AC_MSG_RESULT",	"$build_tests");
 	ac_config_files();
 	ac_simple("AC_OUTPUT");
 	fclose(c_ac);
+}
+
+int	main(int argc, char **argv)
+{
+	configure_ac();
 }
