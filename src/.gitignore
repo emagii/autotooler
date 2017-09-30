@@ -1,5 +1,9 @@
 *~
-autoconf.h
 configure.ac
 configure_ac
-headers.inc
+
+autoconf.h
+
+user-code.inc
+user-headers.inc
+

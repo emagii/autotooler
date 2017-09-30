@@ -36,9 +36,13 @@
 #include	<stdbool.h>
 #include	"autoconf.h"
 
-#define		CHECK_HEADERS_FILE	"headers.inc"
+#define		CHECK_HEADERS_FILE	"user-headers.inc"
 #define		min(a, b)	(a<b?a:b)
 FILE	*c_ac;
+
+
+#define	F_CC	(1 << 0)
+#define	F_CXX	(1 << 1)
 
 void	ac_simple(char	*s)
 {
@@ -184,11 +188,12 @@ void	ac_arg_enable(char *arg, char *help, bool lib)
 }
 
 
-void	ac_arg_with_include (char *library, char *libname, char *name, char *path)
+void	ac_arg_with_include (char *library, char *libname, char *name, char *path, int flags)
 {
 	int	i,len;
 	char	LIBRARY[128];
 	char	c;
+	char	*symbol;
 	fprintf(c_ac, "AC_ARG_WITH([%s-include-path],\n", library);
 	fprintf(c_ac, "\t"
 		"[AS_HELP_STRING("
@@ -206,15 +211,21 @@ void	ac_arg_with_include (char *library, char *libname, char *name, char *path)
 		LIBRARY[i]=toupper(c);
 	}
 	LIBRARY[i] = '\0';
-
-	fprintf(c_ac, "\t[%s_CFLAGS=\"-I$withval\"],\n", LIBRARY);
-	fprintf(c_ac, "\t[%s_CFLAGS=\"-I%s\"])\n", LIBRARY, path);
+	if (flags & F_CC) {
+		symbol = "CFLAGS";
+	} else if (flags & F_CXX) {
+		symbol = "CXXFLAGS";
+	} else {
+		symbol = "BADFLAGS";
+	}
+	fprintf(c_ac, "\t[%s_%s=\"-I$withval\"],\n",	symbol, LIBRARY);
+	fprintf(c_ac, "\t[%s_%s=\"-I%s\"])\n",		symbol, LIBRARY, path);
 
 	fprintf(c_ac, "AC_SUBST([%s_CFLAGS])\n", LIBRARY);
 	newline();
 }
 
-void	ac_arg_with_lib_path(char *library, char *libname,char *name, char *path)
+void	ac_arg_with_lib_path(char *library, char *libname,char *name, char *path, int flags)
 {
 	int	i,len;
 	char	LIBRARY[128];
@@ -289,17 +300,54 @@ int	main(int argc, char **argv)
 	newline();
 	ac_check_headers(CHECK_HEADERS_FILE);
 
+#if	defined(CONFIG_BOOST)
+	ac_simple("# ==== Boost Libraries");
+	ac_arg_with_include ("boost", "", "Boost", "/usr/include/boost",F_CXX);
+	ac_arg_with_lib_path("boost", 
+		   "boost_system"
+		" -lboost_filesystem"
+		" -lboost_program_options"
+		" -lboost_thread"
+		" -lpthread",
+		"Boost", "/usr/lib",F_CXX);
+	ac_arg_enable("boost", "Include Boost Libraries", true);
+#endif
+
+#if	defined(CONFIG_CURL)
+	ac_simple("# ==== cURL Libraries");
+	ac_arg_with_include ("curl", "curl", "cURL", "/usr/include",F_CXX);
+	ac_arg_with_lib_path("curl", "curl", "cURL", "/usr/lib",F_CXX);
+	ac_arg_enable("curl", "Include cURL", true);
+#endif
+
+#if	defined(CONFIG_CURLPP)
+	ac_simple("# ==== cURLPP Libraries");
+	ac_arg_with_include ("curlpp", "curlpp", "cURLPP", "/usr/include",F_CXX);
+	ac_arg_with_lib_path("curlpp", "curlpp -lutilspp", "cURLPP", "/usr/lib",F_CXX);
+	ac_arg_enable("curlpp", "Include cURLPP", true);
+#endif
+
 #if	defined(CONFIG_OPENSSL)
 	ac_simple("# ==== OpenSSL Libraries");
-	ac_arg_with_include ("openssl", "ssl", "OpenSSL", "/usr/include");
-	ac_arg_with_lib_path("openssl", "ssl", "OpenSSL", "/usr/lib");
+	ac_arg_with_include ("openssl", "ssl", "OpenSSL", "/usr/include",F_CC);
+	ac_arg_with_lib_path("openssl", "ssl", "OpenSSL", "/usr/lib",F_CC);
 	ac_arg_enable("openssl", "Include OpenSSL", true);
+#endif
+
+#if	defined(CONFIG_PTHREAD)
+	ac_simple("# ==== Pthread Libraries");
+	ac_arg_with_include ("pthread", "pthread", "PThread", "/usr/include",F_CC);
+	ac_arg_with_lib_path("pthread", "pthread", "PThread", "/usr/include",F_CC);
+	ac_arg_enable("pthread", "Include PThreads", true);
 #endif
 
 #if	defined(CONFIG_DEBUG)
 	ac_simple("# ==== Debug");
 	ac_arg_enable("debug", "Build with DEBUG enabled", false);
 #endif
+
+#include "user-code.inc"
+
 	ac_simple("AC_SUBST([CFLAGS])");
 	ac_config_files();
 	ac_simple("AC_OUTPUT");
