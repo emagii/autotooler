@@ -7,5 +7,12 @@ configure_ac
 Makefile_am
 Makefile.am
 
+API
+HEADERS
+SOURCES
 
+api_headers.dat
+headers.dat
+sources.dat
 
+REPO
