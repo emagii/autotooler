@@ -6,8 +6,6 @@ config	HAVE_DOT_CONFIG
 	help
 	  Indicate that have an included file.
 
-# source "lib/Config.in"
-
 config	CONFIG_PROJECT
 	string	"Project Name"
 	default "myproject"
@@ -33,6 +31,9 @@ config	CONFIG_PROJECT_TYPE
 	default "program"	if CONFIG_PROGRAM
 	default "library"	if CONFIG_LIBRARY
 
+# ===============================================
+#
+# ===============================================
 choice
 	prompt "Build Target"
 	default CONFIG_SHARED_LIB
@@ -54,6 +55,7 @@ config	CONFIG_STATIC_LIB
 	  Use this mode to load an embedded application
 	  which can have a size of up to 1 MByte
 endchoice
+# ===============================================
 
 config	CONFIG_LIBRARY
 	bool
@@ -61,6 +63,9 @@ config	CONFIG_LIBRARY
 	default	y	if CONFIG_STATIC_LIB
 	default	n
 
+# ===============================================
+#
+# ===============================================
 if	CONFIG_LIBRARY
 menu "Library Setup"
 
@@ -74,6 +79,7 @@ config	CONFIG_LIBRARY_VERSION
 
 endmenu
 endif
+# ===============================================
 
 config	CONFIG_COPYRIGHT_DATE
 	string "Copyright Date '2016-2017"
@@ -111,6 +117,9 @@ config	CONFIG_SRCDIR
 	string	"Source Code directory"
 	default	"src"
 
+# ===============================================
+#
+# ===============================================
 menu "Linker Libraries"
 
 config	CONFIG_BOOST
@@ -125,9 +134,15 @@ config	CONFIG_OPENSSL
 config	CONFIG_PTHREAD
 	bool	"PThread"
 
-source	"user/user-libs.inc"
+source	"src/user/user-libs.inc"
 endmenu
+# ===============================================
 
+
+# ===============================================
+#
+# ===============================================
+menu	"Options"
 menu	"OS Options"
 
 config	CONFIG_OS_ANDROID
@@ -149,6 +164,8 @@ config	CONFIG_OS_OTHER
 	bool	"other"
 
 endmenu
+# ===============================================
+
 
 #config	CONFIG_OS
 #	string
@@ -170,10 +187,9 @@ config	CONFIG_DEBUG_VAR
 ### user options
 #
 #
-source	"user/user-options.inc"
+source	"src/user/user-options.inc"
 #
 #
 ### end user options
 
 endmenu
-
