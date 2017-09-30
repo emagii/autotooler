@@ -1,7 +1,7 @@
 #!/bin/sh
 CONFIG=$1/.config
 
-mkdir	-p	${1}/user
+mkdir	-p	${1}
 cd	${1}
 
 get_repo ()
@@ -26,9 +26,20 @@ raw ()
 }
 
 get_repo	"$1"
+
+mkdir	-p	user
 rsync	-av	"$1/user/"	user
 ln	-sf	"../../user"	"$1/src/user"
-		
+
+mkdir	-p	${1}.git
+ln	-sf	"../../${1}.git"	"$1/src/REPO"
+pushd		${1}.git	&>/dev/null
+git	init
+echo	"*~"	>	.gitignore
+git	add	.gitignore
+git	commit	-m "Initial Commit" -s
+popd				&>/dev/null
+
 raw						"HAVE_DOT_CONFIG=y"
 add_config_string	PROJECT			"$1"
 add_config_string	SRC_URI_HOST		"https://www.github.com/emagii"
