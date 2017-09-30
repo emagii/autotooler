@@ -15,6 +15,12 @@ ifeq ($(CONFIG_SHELL),)
 $(error GNU Bash is needed to build autotooler!)
 endif
 
+CONFIGURED=$(shell ls ../user/emagii_defconfig | wc -l)
+
+ifeq ($(CONFIGURED),0)
+$(error You need a ../user folder with user configuration)
+endif
+
 BINDIR:=$(TOPDIR)/binaries
 
 DATE := $(shell date)
