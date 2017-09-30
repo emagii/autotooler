@@ -1,0 +1,188 @@
+mainmenu "Application/Library Configuration"
+
+config	HAVE_DOT_CONFIG
+	bool
+	default y
+	help
+	  Indicate that have an included file.
+
+# source "lib/Config.in"
+
+config	CONFIG_PROJECT
+	string	"Project Name"
+	default "myproject"
+
+config	CONFIG_SRC_URI_HOST
+	string	"git path"
+	default	"https://www.github.com/emagii"
+
+config	CONFIG_SRC_URI_REPO
+	string	"git repo (if LIBRARY_NAME is wrong)"
+	default	""
+	help
+	  if git repo is empty, we will clone from <CONFIG_LIBRARY_NAME>.git
+
+config	CONFIG_WORKDIR
+	string	"workdir"
+	default	"${HOME}/projects/autotooler"
+	help
+	  All libraries will be cloned here
+
+config	CONFIG_PROJECT_TYPE
+	string
+	default "program"	if CONFIG_PROGRAM
+	default "library"	if CONFIG_LIBRARY
+
+choice
+	prompt "Build Target"
+	default CONFIG_SHARED_LIB
+
+config	CONFIG_PROGRAM
+	bool "Build an Application"
+	help
+	  Use this mode to load an second level boot monitor
+	  like U-boot into the last MB of SDRAM.
+
+config	CONFIG_SHARED_LIB
+	bool "Build a Shared Library"
+	---help---
+	   Load Linux kernel directly from storage media
+
+config	CONFIG_STATIC_LIB
+	bool "Build a Static Library"
+	help
+	  Use this mode to load an embedded application
+	  which can have a size of up to 1 MByte
+endchoice
+
+config	CONFIG_LIBRARY
+	bool
+	default	y	if CONFIG_SHARED_LIB
+	default	y	if CONFIG_STATIC_LIB
+	default	n
+
+if	CONFIG_LIBRARY
+menu "Library Setup"
+
+config	CONFIG_LIBRARY_NAME
+	string "library name"
+	default "lib<x>"
+	
+config	CONFIG_LIBRARY_VERSION
+	string "Library Version"
+	default "1.0"
+
+endmenu
+endif
+
+config	CONFIG_COPYRIGHT_DATE
+	string "Copyright Date '2016-2017"
+	default "2017"
+	
+config	CONFIG_AUTHOR
+	string "Author Familyname <author@domain.com>"
+	default	"Ulf Samuelsson"
+
+config	CONFIG_AUTHOR_EMAIL
+	string "email: author@domain.com"
+	default	"ulf@emagii.com"
+
+config	CONFIG_HOMEPAGE
+	string "homepage: http://www.example.com/"
+	default	"http://www.emagii.com/"
+
+config	CONFIG_AC_PRERQ
+	string	"CONFIG_AC_PRERQ"
+	default	"2.59"
+
+config	CONFIG_AC_CONFIG_HEADER
+	string "AC_INIT Header (config.h)"
+	default	"src/include/config.h"
+
+config	CONFIG_AC_CONFIG_MACRO_DIR
+	string "AC_CONFIG_MACRO_DIR (m4)"
+	default	"m4"
+
+config	CONFIG_AM_INIT_AUTOMAKE
+	string "AM_INIT_AUTOMAKE (1.10 -Wall no-define)"
+	default	"1.10 -Wall no-define"
+
+config	CONFIG_SRCDIR
+	string	"Source Code directory"
+	default	"src"
+
+menu "Linker Libraries"
+
+config	CONFIG_OPENSSL
+	bool	"OpenSSL"
+
+config	CONFIG_PTHREAD
+	bool	"PThread"
+
+config	CONFIG_CURLPP
+	bool	"cURLPP"
+
+
+endmenu
+
+menu	"Options"
+
+choice	CONFIG_OS_SELECTION
+	prompt	"OS Selection"
+	default	CONFIG_OS_LINUX
+
+config	CONFIG_OS_ANDROID
+	bool	"Android"
+
+config	CONFIG_OS_IOS
+	bool	"iOS"
+
+config	CONFIG_OS_LINUX
+	bool	"Linux"
+
+config	CONFIG_OS_MAC_X
+	bool	"Mac OS X"
+
+config	CONFIG_OS_WINDOWS
+	bool	"Windows"
+
+config	CONFIG_OS_OTHER
+	bool	"other"
+
+endchoice
+
+config	CONFIG_OS
+	string
+	default	"Android"	if CONFIG_OS_ANDROID
+	default	"iOS"		if CONFIG_OS_IOS
+	default	"Linux"		if CONFIG_OS_LINUX
+	default	"Mac OS X"	if CONFIG_OS_MAC_X
+	default	"Windows"	if CONFIG_OS_WINDOWS
+	default	"other"		if CONFIG_OS_OTHER
+
+config	CONFIG_EXAMPLES
+	bool	"Examples"
+
+config	CONFIG_EXAMPLES_VAR
+	depends	on CONFIG_EXAMPLES
+	string	"examples	--enable-<var>"
+	default	"examples"
+
+config	CONFIG_DEBUG
+	bool	"debug"
+
+config	CONFIG_DEBUG_VAR
+	depends	on CONFIG_DEBUG
+	string	"debug	--enable-<var>"
+	default	"debug"
+
+### user options
+#
+#
+source	"user/user-options.inc"
+#
+#
+### end user options
+
+endmenu
+
