@@ -1,9 +1,11 @@
 *~
+autoconf.h
+user*
+
 configure.ac
 configure_ac
+Makefile_am
+Makefile.am
 
-autoconf.h
 
-user-code.inc
-user-headers.inc
 
