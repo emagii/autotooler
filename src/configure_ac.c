@@ -2,32 +2,40 @@
 #if	0
 /*
  * Automatically generated C config: don't edit
- * Sat Sep 30 11:33:07 2017
+ * Sun Oct  1 10:14:27 2017
  */
 #define CONFIG_SHARED_LIB 1
+#define CONFIG_OS_ANDROID 1
+#define CONFIG_OS_MAC_X 1
+#define CONFIG_OS_LINUX 1
+#define CONFIG_SIMPLE_AV_VAR "simple-av"
 #define CONFIG_PTHREAD 1
 #define CONFIG_LIBRARY 1
-#define CONFIG_PROJECT "library"
+#define CONFIG_PROJECT "libzip_api"
+#define CONFIG_TCP_PORTAL 1
 #define CONFIG_ZIP_V2_VAR "zip-v2"
+#define CONFIG_WORKDIR "${HOME}/projects/InWido/Applications/Homekit/Libraries"
 #define CONFIG_OPENSSL 1
 #define CONFIG_COPYRIGHT_DATE "2017"
 #define CONFIG_HOMEPAGE "http://www.emagii.com/"
+#define CONFIG_TCP_PORTAL_VAR "tcp-portal"
 #define CONFIG_DEBUG 1
 #define HAVE_DOT_CONFIG 1
 #define CONFIG_AC_PRERQ "2.59"
-#define CONFIG_OS_LINUX 1
-#define CONFIG_LIBRARY_NAME "lib<x>"
+#define CONFIG_LIBRARY_NAME "libzip_api"
 #define CONFIG_AUTHOR_EMAIL "ulf@emagii.com"
-#define CONFIG_LIBRARY_VERSION "1.0"
-#define CONFIG_AC_CONFIG_HEADER "src/include/config.h"
-#define CONFIG_OS "Linux"
+#define CONFIG_LIBRARY_VERSION "7.38"
+#define CONFIG_AC_CONFIG_HEADER "src/user/config.h"
 #define CONFIG_AC_CONFIG_MACRO_DIR "m4"
 #define CONFIG_DEBUG_VAR "debug"
+#define CONFIG_PROJECT_TYPE "library"
+#define CONFIG_SIMPLE_AV 1
 #define CONFIG_SRCDIR "src"
-#define CONFIG_AUTHOR "Ulf Samuelsson <ulf@emagii.com>"
+#define CONFIG_SRC_URI_REPO ""
+#define CONFIG_AUTHOR "Ulf Samuelsson"
+#define CONFIG_SRC_URI_HOST "https://www.github.com/emagii"
 #define CONFIG_AM_INIT_AUTOMAKE "1.10 -Wall no-define"
 #define CONFIG_ZIP_V2 1
-
 #endif
 
 #include	<stdio.h>
@@ -183,10 +191,9 @@ void	ac_arg_enable(char *arg, char *help, bool lib)
 	fprintf(c_ac, "\t esac\n");
 	fprintf(c_ac, "\t],\n");
 	fprintf(c_ac, "\t[%s%s=false])\n", use, variable);
-	fprintf(c_ac, "AM_CONDITIONAL(CONFIG_%s, test x$%s = xtrue)\n", VARIABLE, variable);
+	fprintf(c_ac, "AM_CONDITIONAL(CONFIG_%s, test x$%s%s = xtrue)\n", VARIABLE, use, variable);
 	newline();
 }
-
 
 void	ac_arg_with_include (char *library, char *libname, char *name, char *path, int flags)
 {
@@ -253,6 +260,14 @@ void	ac_arg_with_lib_path(char *library, char *libname,char *name, char *path, i
 
 	fprintf(c_ac, "AC_SUBST([%s_LIBS])\n", LIBRARY);
 	newline();
+}
+
+
+void	pkg_check_modules(char *name, char *lib, char *min_version) 
+{
+	fprintf(c_ac, "PKG_CHECK_MODULES([%s], [%s >= %s],,\n", name, lib, min_version);
+	fprintf(c_ac, "\tAC_MSG_ERROR([%s %s or newer not found.])\n", lib, min_version);
+	fprintf(c_ac, ")\n");
 }
 
 void	ac_config_files()
@@ -347,9 +362,33 @@ void	configure_ac(void)
 	ac_arg_enable("pthread", "Include PThreads", true);
 #endif
 
+	ac_simple("# ==== OS Support");
+#if	defined(CONFIG_OS_ANDROID)
+	ac_arg_enable("android", 	"Build for Android enabled", false);
+#endif
+#if	defined(CONFIG_OS_IOS)
+	ac_arg_enable("ios",		"Build for iOS enabled", false);
+#endif
+#if	defined(CONFIG_OS_LINUX)
+	ac_arg_enable("linux",		"Build for Linux enabled", false);
+#endif
+#if	defined(CONFIG_OS_MAC_X)
+	ac_arg_enable("mac-os-x",	"Build for Mac OS X enabled", false);
+#endif
+#if	defined(CONFIG_OS_WINDOWS)
+	ac_arg_enable("windows",	"Build for Windows enabled", false);
+#endif
+#if	defined(CONFIG_OS_OTHER)
+	ac_arg_enable("os-other",	"Build for 'Other' OS is enabled", false);
+#endif
+
 #if	defined(CONFIG_DEBUG)
 	ac_simple("# ==== Debug");
 	ac_arg_enable("debug", "Build with DEBUG enabled", false);
+#endif
+
+#if	defined(CONFIG_MOD_LIBCONFIG)
+	pkg_check_modules("LIBCONFIGXX","libconfig++","1.4");
 #endif
 
 #include "user-code.inc"

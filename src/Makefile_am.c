@@ -37,6 +37,9 @@
 #include	<assert.h>
 #include	"autoconf.h"
 
+#define	REQUIRED	1
+#define	OPTIONAL	0
+
 #if	!defined(CONFIG_VERSION_INFO)
 #define	CONFIG_VERSION_INFO	"0:0:0"
 #endif
@@ -91,25 +94,25 @@ void	am_cppflags(void)
 {
 	fprintf(M_am, INDENT "-I$(%s) \\\n",	"AM_CPPFLAGS =",	"top_builddir");
 	fprintf(M_am, INDENT "-I$(%s) \\\n",	"",			"top_srcdir");
-	fprintf(M_am, INDENT "-I$(%s)/%s \\\n",	"",			"top_srcdir",	"src/include");
-	fprintf(M_am, INDENT "-I$(%s)/%s \\\n",	"",			"top_srcdir",	"src/include/zwave");
 	fprintf(M_am, INDENT "  $(%s)\n",	 	"",		"DEP_CFLAGS");
 	newline();
 }
 
 void	os_select()
 {
-	am_cond("OS_MAC_X");
-	am_config("OS","OS_MAC_X");
-	am_endif();
-
-	am_cond("OS_ANDROID");
-	am_config("OS","OS_ANDROID");
+	am_cond("CONFIG_OS_ANDROID");
+	am_config_add("CFLAGS","-DOS_ANDROID");
 	am_endif();
 
 	am_cond("OS_LINUX");
-	am_config("OS","OS_LINUX");
+	am_config_add("CFLAGS","-DOS_LINUX");
 	am_endif();
+
+	am_cond("OS_MAC_X");
+	am_config_add("CFLAGS","-DMAC_OS_X");
+	am_endif();
+
+
 }
 
 void api_headers(void)
@@ -137,6 +140,31 @@ void api_headers(void)
 	fclose(API);
 }
 
+int	include_raw(char	*filename, int required)
+{
+	FILE	*f;
+	char	*line, *p;
+	char	buffer[1030];
+
+	f = fopen(filename, "r");
+	if (f == NULL) {
+		if (required == REQUIRED) {
+			return	-1;
+		} else {
+			return	0;
+		}
+	}
+	while(1) {
+		line = fgets(buffer, 1024, f);
+		if (line == NULL)
+			break;
+		fprintf(M_am, "%s", line);
+	}
+	newline();
+	fclose(f);
+	return	0;
+}
+
 void	Makefile_am(void)
 {
 	char	version_info[32];
@@ -146,10 +174,12 @@ void	Makefile_am(void)
 	newline();
 	am_config("ACLOCAL_AMFLAGS",	"${ACLOCAL_FLAGS} -I m4");
 	newline();
+	am_config("AM_CFLAGS","");
+	am_config("AM_LDFLAGS","");
 	am_cppflags();
+	newline();
 	am_config("lib_LTLIBRARIES", CONFIG_LIBRARY_NAME ".la");
-
-
+	newline();
 	am_config("CLEANFILES","");
 	newline();
 	am_config("pkgconfigdir", "$(libdir)/pkgconfig");
@@ -159,11 +189,7 @@ void	Makefile_am(void)
 	am_config("VERSION_INFO", version_info);
 	newline();
 
-	am_config("AM_CFLAGS","");
-	am_config("AM_LDFLAGS","");
-	newline();
 	os_select();
-	am_config_add("AM_CFLAGS", "-D${OS}");
 	newline();
 	am_config("LIB_CFLAGS", "");
 	newline();
@@ -173,28 +199,30 @@ void	Makefile_am(void)
 	am_endif();
 
 	am_use_cond("PTHREAD");
+		am_config_add("AM_CFLAGS",	"-pthread");
 		am_config_add("LIB_CFLAGS",	"$(PTHREAD_CFLAGS)");
 	am_endif();
 
 	am_cond("CONFIG_DEBUG");
-		am_config_add("AM_CFLAGS",	"-g -O0");
+		am_config_add("AM_CFLAGS",	"-g -O0 -DDEBUG -DCONFIG_DEBUG");
 	am_else();
 		am_config_add("AM_CFLAGS",	"-O2");
 	am_endif();
 
-	am_use_cond("PTHREAD");
-		am_config_add("LIB_CFLAGS",	"$(PTHREAD_CFLAGS)");
-	am_endif();
-// TODO:	simple-av
-
+#include	"user/user-code-am.inc"
+	newline();
+	am_config_add("AM_CFLAGS",				"$(LIB_CFLAGS)");
+	newline();
 	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
-	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS_EXTRA",	"");
-	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS_EXTRA",	"-DZIP_API_BUILDING_LIBRARY");
 	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
-	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS) $(CONFIG_LIBRARY_NAME_la_CPPFLAGS_EXTRA)");
+	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
 
-	raw("# Makefile.inc provides the CSOURCES and HHEADERS defines");
-	raw("include Makefile.inc");
+	raw("# Sources.inc provides the CSOURCES, HHEADERS and INSTALL_HEADERS defines");
+
+	if(include_raw("user/Sources.inc",REQUIRED)) {
+		perror("Source and Header definitions missing");
+		goto	exit;
+	}
 
 	am_config(CONFIG_LIBRARY_NAME "_la_SOURCES",		"$(CSOURCES) $(HHEADERS)");
 
@@ -204,13 +232,12 @@ void	Makefile_am(void)
 	am_config(CONFIG_LIBRARY_NAME "_ladir",			"$(includedir)");
 #endif
 
-	api_headers();
+	am_config(CONFIG_LIBRARY_NAME "_la_HEADERS",		"$(INSTALL_HEADERS)\n");
 
 	raw("clean-local:");
+exit:
 	fclose(M_am);
 }
-
-
 
 int	main(int argc, char **argv)
 {

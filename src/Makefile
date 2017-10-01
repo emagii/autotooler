@@ -6,6 +6,8 @@
 
 
 CFLAGS	+=	-I.
+CFLAGS	+=	$(pkg-config --cflags libconfig)
+LIBFLAGS+=	$(pkg-config --libs libconfig)
 
 all:	ac	am
 
@@ -16,13 +18,16 @@ ac:	configure.ac
 configure.ac:	configure_ac
 	./configure_ac
 
-configure_ac:	configure_ac.c	autoconf.h user-code.inc user-headers.inc
+configure_ac:	configure_ac.c	autoconf.h user-code-ac.inc user-headers.inc
 	${CC}	${CFLAGS} -o $@	configure_ac.c
 
 autoconf.h:	../config/autotooler-config/autoconf.h
 	cp	$<	$@
 
-user-code.inc:		user/user-code.inc
+user-code-am.inc:		user/user-code-am.inc
+	cp	$<	$@
+
+user-code-ac.inc:		user/user-code-ac.inc
 	cp	$<	$@
 
 user-headers.inc:	user/user-headers.inc
@@ -33,8 +38,8 @@ am:	Makefile.am
 Makefile.am:	Makefile_am
 	./Makefile_am
 
-Makefile_am:	Makefile_am.c	autoconf.h fileinfo
-	${CC}	${CFLAGS} -o $@	Makefile_am.c
+Makefile_am:	Makefile_am.c	autoconf.h user-code-am.inc user/Sources.inc fileinfo
+	${CC}	${CFLAGS} -o $@	Makefile_am.c	${LIBFLAGS}
 
 .PHONY:	fileinfo
 fileinfo:	api_headers.dat	headers.dat	sources.dat
