@@ -1,8 +1,7 @@
 #!/bin/sh
 
-
-# mkdir	-p	${1}
-# cd	${1}
+# Ease up on git use.
+git config credential.helper 'cache --timeout=36000'
 
 get_repo ()
 {
