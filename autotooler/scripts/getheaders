@@ -1,0 +1,28 @@
+#!/bin/sh
+
+#	Remove '//' comments
+#	Remove trailing space
+#	Delete empty lines or lines only containing whitespace
+#	Remove <filename> ':' <whitespace>
+#	Remove '#' <whitespace> include <whitespace>
+#	leading	'<' 	-> TAB
+#	leading	'"'	-> TAB
+#	'"' 		-> " \"
+#	'>' 		-> " \"
+
+grep include *.c | \
+	sed -e	's%//.*$%%g'			| \
+	sed -e	'/^\s*$/d'			| \
+	sed -e	's/^.*:\s*//g'			| \
+	sed -e	's/^[#]\s*include\s*//g'	| \
+	sed -e	's/^<//g'			| \
+	sed -e	's/^"//g'			| \
+	sed -e	's/".*/ \\/g'			| \
+	sed -e	's/>.*/ \\/g'			| \
+	sed -e	's%^[.]*/include/%%g'		| \
+	sed -e	's%\s*$%%g'			| \
+	sed -e	's%$%%g'			| \
+	sed -e	'/^[[:space:]]*$/d'		| \
+	sed -e	's/^/\t/g'			| \
+	sort					| \
+	uniq					> files
