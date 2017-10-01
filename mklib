@@ -1,14 +1,13 @@
 #!/bin/sh
-CONFIG=$1/.config
 
-mkdir	-p	${1}
-cd	${1}
+
+# mkdir	-p	${1}
+# cd	${1}
 
 get_repo ()
 {
 	git clone	https://www.github.com/emagii/autotooler.git	"$1"
 }
-
 
 add_config_string ()
 {
@@ -25,41 +24,107 @@ raw ()
 	echo	"$1"	>>	${CONFIG}
 }
 
-get_repo	"$1"
+# get_repo	"$1"
 
-mkdir	-p	user
-rsync	-av	"$1/user/"	user
-ln	-sf	"../../user"	"$1/src/user"
+REPO=""
+purge ()
+{
+	rm	-f *~
+}
 
-mkdir	-p	${1}.git
-ln	-sf	"../../${1}.git"	"$1/src/REPO"
-pushd		${1}.git	&>/dev/null
-git	init
-echo	"*~"	>	.gitignore
-git	add	.gitignore
-git	commit	-m "Initial Commit" -s
-popd				&>/dev/null
+purge
 
-raw						"HAVE_DOT_CONFIG=y"
-add_config_string	PROJECT			"$1"
-add_config_string	SRC_URI_HOST		"https://www.github.com/emagii"
-add_config_string	SRC_URI_REPO		""
-add_config_string	WORKDIR			"\${HOME}/projects/autotooler"
-add_config_string	PROJECT_TYPE		"library"
-add_config_yes		SHARED_LIB	
-add_config_yes		LIBRARY
+for f in $(ls -1) ; do
+	if [ "$f" == "mklib" ] ; then
+		continue;
+	fi
+	if [ "$f" == "autotooler" ] ; then
+		continue;
+	fi
+	if [ "$f" == "README" ] ; then
+		continue;
+	fi
+	if [ -d "$f/.git" ] ; then
+		REPO="$f"
+		break;
+	else
+		continue;
+	fi
+done
 
-add_config_string	LIBRARY_NAME		"$1"
-add_config_string	LIBRARY_VERSION		"1.0"
-add_config_string	COPYRIGHT_DATE		"2017"
-add_config_string	AUTHOR			"Ulf Samuelsson"
-add_config_string	AUTHOR_EMAIL		"ulf@emagii.com"
-add_config_string	HOMEPAGE		"http://www.emagii.com/"
-add_config_string	AC_PRERQ		"2.59"
-add_config_string	AC_CONFIG_HEADER	"src/include/config.h"
-add_config_string	AC_CONFIG_MACRO_DIR	"m4"
-add_config_string	AM_INIT_AUTOMAKE	"1.10 -Wall no-define"
-add_config_string	SRCDIR			"src"
+if [ "x$REPO" == "x" ] ; then
+	echo	"Did not find a git repo, exiting"
+	exit	1
+fi
 
-add_config_yes		OS_LINUX
-mkdir	-p		$1/m4
+init_repo_autotooler ()
+{
+	if	[ -d $REPO/autotooler ] ; then
+		echo	"$REPO contains autotooler subdir"
+	else
+		mkdir	-p	$REPO/autotooler
+		rsync	-av	"autotooler/user/"	"$REPO/autotooler"
+	fi
+}
+
+init_repo ()
+{
+	pushd	$REPO		&>/dev/null
+
+	mkdir	-p		m4
+	mkdir	-p		src/include
+	touch			README
+	if	! [ -f AUTHORS ] ; then
+		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
+	fi
+	touch			LICENSE
+
+	popd				&>/dev/null
+}
+
+init_links ()
+{
+	pushd	autotooler		&>/dev/null
+	ln	-sf 	../$REPO	REPO
+	popd				&>/dev/null
+	pushd	autotooler/src		&>/dev/null
+	ln	-sf	"../../$REPO/autotooler"		"user"
+	ln	-sf	"../../$REPO"				"REPO"
+	popd				&>/dev/null
+}
+
+init_config ()
+	pushd	autotooler		&>/dev/null
+	CONFIG=.config
+	raw						"HAVE_DOT_CONFIG=y"
+	add_config_string	PROJECT			"$REPO"
+	add_config_string	SRC_URI_HOST		"${SRC_URI}"
+	add_config_string	SRC_URI_REPO		""
+	add_config_string	WORKDIR			"${WORKDIR}"
+	add_config_string	PROJECT_TYPE		"library"
+	add_config_yes		SHARED_LIB	
+	add_config_yes		LIBRARY
+
+	add_config_string	LIBRARY_NAME		"$REPO"
+	add_config_string	LIBRARY_VERSION		"1.0"
+	add_config_string	COPYRIGHT_DATE		"2017"
+	add_config_string	AUTHOR			"${AUTHOR}"
+	add_config_string	AUTHOR_EMAIL		"${EMAIL}"
+	add_config_string	HOMEPAGE		"${HOMEPAGE}"
+	add_config_string	AC_PRERQ		"2.59"
+	add_config_string	AC_CONFIG_HEADER	"src/include/config.h"
+	add_config_string	AC_CONFIG_MACRO_DIR	"m4"
+	add_config_string	AM_INIT_AUTOMAKE	"1.10 -Wall no-define"
+	add_config_string	SRCDIR			"src"
+
+	add_config_yes		OS_LINUX
+	popd				&>/dev/null
+}
+
+init_repo_autotooler
+init_repo
+init_links
+DEFCONFIG=$(cd $REPO/autotooler ; find . -name '*_defconfig')
+if [ "x$DEFCONFIG" == "x" ] ; then
+	init_config
+fi
