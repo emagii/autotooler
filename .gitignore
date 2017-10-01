@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# But not these files...
+!autotooler
+!autotooler/*
+!mklib
+!config.inc
+!.gitignore
