@@ -1,5 +1,5 @@
 #
-# Default config file is in $(TOPDIR)/user/defconfig
+# Default config file is in $(TOPDIR)/REPO/autotooler/*_defconfig
 # First, run xxx_defconfig
 # Then, `make menuconfig' if needed
 #
@@ -15,10 +15,10 @@ ifeq ($(CONFIG_SHELL),)
 $(error GNU Bash is needed to build autotooler!)
 endif
 
-CONFIGURED=$(shell ls ../user/emagii_defconfig | wc -l)
+CONFIGURED=$(shell ls REPO/.git | wc -l)
 
 ifeq ($(CONFIGURED),0)
-$(error You need a ../user folder with user configuration)
+$(error You need a git repo in the autotooler TOPDIR)
 endif
 
 BINDIR:=$(TOPDIR)/binaries
@@ -117,12 +117,17 @@ endif  # HAVE_DOT_CONFIG
 PHONY+= rebuild
 
 %_defconfig:
-	echo $(shell find ./user/ -name $@)
-	cp $(shell find ./user/ -name $@) .config
+	mkdir -p	REPO/autotooler
+	echo $(shell find ./REPO/autotooler/ -name $@)
+	cp $(shell find ./REPO/autotooler/ -name $@) .config
 	@$(MAKE) oldconfig
 
+install:
+	${MAKE} -C src	install
+
 update:
-	cp .config user/$(PROJECT)_defconfig
+	mkdir -p	REPO/autotooler
+	cp .config REPO/autotooler/$(PROJECT)_defconfig
 
 debug:
 	cat	config/autotooler-config/autoconf.h
