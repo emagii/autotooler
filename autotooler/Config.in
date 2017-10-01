@@ -77,6 +77,10 @@ config	CONFIG_LIBRARY_VERSION
 	string "Library Version"
 	default "1.0"
 
+config	CONFIG_LIBRARY_INSTALLDIR
+	string "Library Header Install directory"
+	default ""
+
 endmenu
 endif
 # ===============================================
