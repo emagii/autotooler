@@ -1,7 +1,11 @@
 #!/bin/sh
 
 # Ease up on git use.
-git config credential.helper 'cache --timeout=36000'
+
+add_credentials ()
+{
+	git config credential.helper 'cache --timeout=36000'
+}
 
 get_repo ()
 {
@@ -23,61 +27,73 @@ raw ()
 	echo	"$1"	>>	${CONFIG}
 }
 
-# get_repo	"$1"
-
-REPO=""
 purge ()
 {
 	rm	-f *~
 }
 
-purge
-
-for f in $(ls -1) ; do
-	if [ "$f" == "mklib" ] ; then
-		continue;
+get_repo ()
+{
+	REPO=""
+	for f in $(ls -1) ; do
+		if [ "$f" == "mklib" ] ; then
+			continue;
+		fi
+		if [ "$f" == "autotooler" ] ; then
+			continue;
+		fi
+		if [ "$f" == "README" ] ; then
+			continue;
+		fi
+		if [ -d "$f/.git" ] ; then
+			REPO="$f"
+			break;
+		else
+			continue;
+		fi
+	done
+	if [ "x$REPO" == "x" ] ; then
+		echo	"Did not find a git repo, exiting"
+		exit	1
 	fi
-	if [ "$f" == "autotooler" ] ; then
-		continue;
-	fi
-	if [ "$f" == "README" ] ; then
-		continue;
-	fi
-	if [ -d "$f/.git" ] ; then
-		REPO="$f"
-		break;
-	else
-		continue;
-	fi
-done
-
-if [ "x$REPO" == "x" ] ; then
-	echo	"Did not find a git repo, exiting"
-	exit	1
-fi
+}
 
 init_repo_autotooler ()
 {
 	if	[ -d $REPO/autotooler ] ; then
 		echo	"$REPO contains autotooler subdir"
+		DEFCONFIG=$(cd $REPO/autotooler ; find . -name '*_defconfig')
 	else
+		echo	"Adding autotooler subdir to $REPO and syncing"
 		mkdir	-p	$REPO/autotooler
 		rsync	-av	"autotooler/user/"	"$REPO/autotooler"
+		find "$REPO/autotooler" -name '*_defconfig' | xargs /bin/rm
+		DEFCONFIG=""
 	fi
 }
 
 init_repo ()
 {
 	pushd	$REPO		&>/dev/null
+	git config credential.helper 'cache --timeout=36000'
 
 	mkdir	-p		m4
 	mkdir	-p		src/include
-	touch			README
+	touch			src/include/config.h.in
+	touch			$REPO.pc.in
 	if	! [ -f AUTHORS ] ; then
 		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
 	fi
+	touch			ChangeLog
+	touch			COPYING
+	touch			INSTALL
 	touch			LICENSE
-
+	touch			NEWS
+	touch			README
+	touch			.gitignore
+	if ! [ -f autogen.sh ] ; then
+		install	-m 755 ../autotooler/scripts/autogen.sh	autogen.sh
+	fi
 	popd				&>/dev/null
 }
 
@@ -93,6 +109,7 @@ init_links ()
 }
 
 init_config ()
+{
 	pushd	autotooler		&>/dev/null
 	CONFIG=.config
 	raw						"HAVE_DOT_CONFIG=y"
@@ -120,10 +137,15 @@ init_config ()
 	popd				&>/dev/null
 }
 
+purge
+source	./config.inc
+add_credentials
+get_repo	"$1"
+
+echo	"Autotooling $REPO"
 init_repo_autotooler
 init_repo
 init_links
-DEFCONFIG=$(cd $REPO/autotooler ; find . -name '*_defconfig')
 if [ "x$DEFCONFIG" == "x" ] ; then
 	init_config
 fi
