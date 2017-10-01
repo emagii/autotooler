@@ -44,7 +44,7 @@
 #include	<stdbool.h>
 #include	"autoconf.h"
 
-#define		CHECK_HEADERS_FILE	"user-headers.inc"
+#define		CHECK_HEADERS_FILE	"user/user-headers.inc"
 #define		min(a, b)	(a<b?a:b)
 FILE	*c_ac;
 
@@ -77,6 +77,16 @@ void	ac_init(void)
 void	ac_config(char	*var, char *value)
 {
 	fprintf(c_ac, "%s([%s])\n", var, value);
+	newline();
+}
+
+
+void	ac_config_macro_dir()
+{
+	char	*p = CONFIG_AC_CONFIG_MACRO_DIR;
+	if (*p) {
+		ac_config("AC_CONFIG_MACRO_DIR",p);
+	}
 	newline();
 }
 
@@ -117,7 +127,7 @@ void	ac_check_headers(char *headers_file)
 		fprintf(stderr, "Could not open '%s', not checking headers\n", headers_file);
 		return;
 	}
-	strcpy(header_name, "Cannot open header.inc");
+	strcpy(header_name, "Cannot open header file");
 
 	fprintf(c_ac, "AC_CHECK_HEADERS( \\\n");
 	while(1) {
@@ -155,10 +165,12 @@ void	ac_arg_enable(char *arg, char *help, bool lib)
 	char	*default_help = "";
 	char	variable[128];
 	char	VARIABLE[128];
+	char	*CONFIG = "CONFIG";
 	char	c;
 	char	*use;
 	if (lib) {
 		use = "use_";
+		CONFIG = "USE";
 	} else {
 		use = "";
 	}
@@ -191,7 +203,8 @@ void	ac_arg_enable(char *arg, char *help, bool lib)
 	fprintf(c_ac, "\t esac\n");
 	fprintf(c_ac, "\t],\n");
 	fprintf(c_ac, "\t[%s%s=false])\n", use, variable);
-	fprintf(c_ac, "AM_CONDITIONAL(CONFIG_%s, test x$%s%s = xtrue)\n", VARIABLE, use, variable);
+	fprintf(c_ac, "AS_IF([test	x$%s%s = xtrue], [AC_DEFINE([%s], [], [Description])])\n", use, variable, VARIABLE);
+	fprintf(c_ac, "AM_CONDITIONAL(%s_%s, test x$%s%s = xtrue)\n", CONFIG, VARIABLE, use, variable);
 	newline();
 }
 
@@ -225,8 +238,8 @@ void	ac_arg_with_include (char *library, char *libname, char *name, char *path, 
 	} else {
 		symbol = "BADFLAGS";
 	}
-	fprintf(c_ac, "\t[%s_%s=\"-I$withval\"],\n",	symbol, LIBRARY);
-	fprintf(c_ac, "\t[%s_%s=\"-I%s\"])\n",		symbol, LIBRARY, path);
+	fprintf(c_ac, "\t[%s_%s=\"-I$withval\"],\n",	LIBRARY, symbol);
+	fprintf(c_ac, "\t[%s_%s=\"-I%s\"])\n",		LIBRARY, symbol,  path);
 
 	fprintf(c_ac, "AC_SUBST([%s_CFLAGS])\n", LIBRARY);
 	newline();
@@ -255,7 +268,7 @@ void	ac_arg_with_lib_path(char *library, char *libname,char *name, char *path, i
 	}
 	LIBRARY[i] = '\0';
 
-	fprintf(c_ac, "\t[%s_LIBS=\"-L$withval\" -l%s],\n", LIBRARY, libname);
+	fprintf(c_ac, "\t[%s_LIBS=\"-L$withval -l%s\"],\n", LIBRARY, libname);
 	fprintf(c_ac, "\t[%s_LIBS=\"-L%s -l%s\"])\n", LIBRARY, path, libname);
 
 	fprintf(c_ac, "AC_SUBST([%s_LIBS])\n", LIBRARY);
@@ -293,12 +306,16 @@ void	configure_ac(void)
 	}
 
 	ac_init();
-	ac_config("AC_PRERQ",		CONFIG_AC_PRERQ);
+	ac_config("AC_PREREQ",		CONFIG_AC_PRERQ);
+
 	ac_config("AC_CONFIG_HEADER",	CONFIG_AC_CONFIG_HEADER);
 	ac_config("AC_CONFIG_SRCDIR",	CONFIG_SRCDIR);
+
+	ac_config_macro_dir();
+
 	ac_simple("AC_PROG_CPP");
 	ac_simple("AC_PROG_CC");
-	ac_config("AC_INIT_AUTOMAKE",	CONFIG_AM_INIT_AUTOMAKE);
+	ac_config("AM_INIT_AUTOMAKE",	CONFIG_AM_INIT_AUTOMAKE);
 	ac_simple("AC_PROG_MAKE_SET");
 	ac_simple("AM_MAINTAINER_MODE");
 	ac_simple("AC_HEADER_STDC");
@@ -364,19 +381,19 @@ void	configure_ac(void)
 
 	ac_simple("# ==== OS Support");
 #if	defined(CONFIG_OS_ANDROID)
-	ac_arg_enable("android", 	"Build for Android enabled", false);
+	ac_arg_enable("os-android", 	"Build for Android enabled", false);
 #endif
 #if	defined(CONFIG_OS_IOS)
 	ac_arg_enable("ios",		"Build for iOS enabled", false);
 #endif
 #if	defined(CONFIG_OS_LINUX)
-	ac_arg_enable("linux",		"Build for Linux enabled", false);
+	ac_arg_enable("os-linux",		"Build for Linux enabled", false);
 #endif
 #if	defined(CONFIG_OS_MAC_X)
 	ac_arg_enable("mac-os-x",	"Build for Mac OS X enabled", false);
 #endif
 #if	defined(CONFIG_OS_WINDOWS)
-	ac_arg_enable("windows",	"Build for Windows enabled", false);
+	ac_arg_enable("os-windows",	"Build for Windows enabled", false);
 #endif
 #if	defined(CONFIG_OS_OTHER)
 	ac_arg_enable("os-other",	"Build for 'Other' OS is enabled", false);
@@ -391,7 +408,7 @@ void	configure_ac(void)
 	pkg_check_modules("LIBCONFIGXX","libconfig++","1.4");
 #endif
 
-#include "user-code.inc"
+#include "user/user-code-ac.inc"
 
 	ac_config("AC_SUBST",		"CFLAGS");
 	ac_config("AC_MSG_RESULT",	"$build_tests");

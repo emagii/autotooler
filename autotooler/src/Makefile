@@ -18,46 +18,31 @@ ac:	configure.ac
 configure.ac:	configure_ac
 	./configure_ac
 
-configure_ac:	configure_ac.c	autoconf.h user-code-ac.inc user-headers.inc
+configure_ac:	configure_ac.c	autoconf.h user/user-code-ac.inc user/user-headers.inc
 	${CC}	${CFLAGS} -o $@	configure_ac.c
-
-autoconf.h:	../config/autotooler-config/autoconf.h
-	cp	$<	$@
-
-user-code-am.inc:		user/user-code-am.inc
-	cp	$<	$@
-
-user-code-ac.inc:		user/user-code-ac.inc
-	cp	$<	$@
-
-user-headers.inc:	user/user-headers.inc
-	cp	$<	$@
 
 am:	Makefile.am
 
 Makefile.am:	Makefile_am
 	./Makefile_am
 
-Makefile_am:	Makefile_am.c	autoconf.h user-code-am.inc user/Sources.inc fileinfo
+Makefile_am:	Makefile_am.c	autoconf.h user/Sources.inc user/user-code-am.inc
 	${CC}	${CFLAGS} -o $@	Makefile_am.c	${LIBFLAGS}
 
+autoconf.h:	../config/autotooler-config/autoconf.h
+	cp	$<	$@
+
+install:	am	ac
+	install	-m 644	configure.ac	REPO/configure.ac
+	install	-m 644	Makefile.am	REPO/Makefile.am
+	
 .PHONY:	fileinfo
-fileinfo:	api_headers.dat	headers.dat	sources.dat
-api_headers.dat:	API	purge
-	@(cd	$<	; find . -name  '*.h*' | sed -e 's%^\./%%g'	> ../$@)
-
-headers.dat:		HEADERS	purge
-	@(cd	$<	; find . -name  '*.h*' | sed -e 's%^\./%%g'	> ../$@)
-
-sources.dat:		SOURCES	purge
-	@(cd	$<	; find . -name  '*.c*' | sed -e 's%^\./%%g'	> ../$@)
 
 purge:
 	@touch	tag~
 	@find	. -name '*~'	| xargs /bin/rm
 
 clean:
-	rm	-f	api_headers.dat headers.dat sources.dat
 	rm	-f	Makefile_am	Makefile.am
 	rm	-f	configure_ac	configure.ac
 	rm	-f	user-*

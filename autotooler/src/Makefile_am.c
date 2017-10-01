@@ -44,7 +44,7 @@
 #define	CONFIG_VERSION_INFO	"0:0:0"
 #endif
 
-#define		CHECK_HEADERS_FILE	"user-headers.inc"
+#define		CHECK_HEADERS_FILE	"user/user-headers.inc"
 #define		min(a, b)	(a<b?a:b)
 FILE	*M_am;
 
@@ -101,15 +101,15 @@ void	am_cppflags(void)
 void	os_select()
 {
 	am_cond("CONFIG_OS_ANDROID");
-	am_config_add("CFLAGS","-DOS_ANDROID");
+	am_config_add("AM_CFLAGS","-DOS_ANDROID");
 	am_endif();
 
-	am_cond("OS_LINUX");
-	am_config_add("CFLAGS","-DOS_LINUX");
+	am_cond("CONFIG_OS_LINUX");
+	am_config_add("AM_CFLAGS","-DOS_LINUX");
 	am_endif();
 
-	am_cond("OS_MAC_X");
-	am_config_add("CFLAGS","-DMAC_OS_X");
+	am_cond("CONFIG_MAC_OS_X");
+	am_config_add("AM_CFLAGS","-DMAC_OS_X");
 	am_endif();
 
 
@@ -165,6 +165,19 @@ int	include_raw(char	*filename, int required)
 	return	0;
 }
 
+
+am_installdir ()
+{
+	char	*p = CONFIG_LIBRARY_INSTALLDIR;
+	char	*installdir;
+	if (*p) {
+		installdir = "$(include)" "/" CONFIG_LIBRARY_INSTALLDIR;
+	} else {
+		installdir = "$(include)";
+	}
+	am_config("INSTALLdir",		installdir);
+}
+
 void	Makefile_am(void)
 {
 	char	version_info[32];
@@ -216,6 +229,8 @@ void	Makefile_am(void)
 	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
+
+	am_installdir();
 
 	raw("# Sources.inc provides the CSOURCES, HHEADERS and INSTALL_HEADERS defines");
 
