@@ -47,3 +47,6 @@ libtool
 *.lo
 .libs
 *.la
+
+patches
+stamp-h1
