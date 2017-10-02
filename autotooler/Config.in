@@ -193,7 +193,7 @@ config	CONFIG_DEBUG_VAR
 ### user options
 #
 #
-source	"src/user/user-options.inc"
+source	"src/user/Config.in"
 #
 #
 ### end user options
