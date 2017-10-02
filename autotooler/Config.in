@@ -10,6 +10,8 @@ config	CONFIG_PROJECT
 	string	"Project Name"
 	default "myproject"
 
+source	Platform.in
+
 config	CONFIG_SRC_URI_HOST
 	string	"git path"
 	default	"https://www.github.com/emagii"

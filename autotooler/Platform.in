@@ -1,0 +1,15 @@
+config	TARGET_PLATFORM_BEAGLEBONE
+	bool
+	default	y
+
+config	TARGET_PLATFORM_MT7620
+	bool
+	default	y
+
+config	TARGET_PLATFORM_PC
+	bool
+	default	y
+
+config	TARGET_PLATFORM_RASPBERRYPI
+	bool
+	default	y
