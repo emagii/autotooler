@@ -18,7 +18,7 @@ ac:	configure.ac
 configure.ac:	configure_ac
 	./configure_ac
 
-configure_ac:	configure_ac.c	autoconf.h user/user-code-ac.inc user/user-headers.inc
+configure_ac:	configure_ac.c	autoconf.h user/user-code-ac.inc user/user-headers-ac.inc
 	${CC}	${CFLAGS} -o $@	configure_ac.c
 
 am:	Makefile.am
@@ -26,7 +26,7 @@ am:	Makefile.am
 Makefile.am:	Makefile_am
 	./Makefile_am
 
-Makefile_am:	Makefile_am.c	autoconf.h user/Sources.inc user/user-code-am.inc
+Makefile_am:	Makefile_am.c	autoconf.h user/csource+headers-am.inc user/user-code-am.inc
 	${CC}	${CFLAGS} -o $@	Makefile_am.c	${LIBFLAGS}
 
 autoconf.h:	../config/autotooler-config/autoconf.h

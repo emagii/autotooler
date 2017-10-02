@@ -44,7 +44,6 @@
 #define	CONFIG_VERSION_INFO	"0:0:0"
 #endif
 
-#define		CHECK_HEADERS_FILE	"user/user-headers.inc"
 #define		min(a, b)	(a<b?a:b)
 FILE	*M_am;
 
@@ -244,9 +243,9 @@ void	Makefile_am(void)
 
 	am_installdir();
 
-	raw("# Sources.inc provides the CSOURCES, HHEADERS and INSTALL_HEADERS defines");
+	raw("# 'csource+headers-am.inc' provides the CSOURCES, HHEADERS and INSTALL_HEADERS defines");
 
-	if(include_raw("user/Sources.inc",REQUIRED)) {
+	if(include_raw("user/csource+headers-am.inc",REQUIRED)) {
 		perror("Source and Header definitions missing");
 		goto	exit;
 	}
