@@ -145,12 +145,6 @@ init_config ()
 	popd				&>/dev/null
 }
 
-yocto_script ()
-{
-
-}
-
-
 purge
 source	./config.inc
 add_credentials
