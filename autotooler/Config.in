@@ -140,7 +140,7 @@ config	CONFIG_OPENSSL
 config	CONFIG_PTHREAD
 	bool	"PThread"
 
-source	"src/user/user-libs.inc"
+source	"src/user/Config-libs.in"
 endmenu
 # ===============================================
 
