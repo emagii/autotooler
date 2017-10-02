@@ -100,19 +100,26 @@ void	am_cppflags(void)
 
 void	os_select()
 {
+#if	defined(CONFIG_OS_ANDROID)
 	am_cond("CONFIG_OS_ANDROID");
 	am_config_add("AM_CFLAGS","-DOS_ANDROID");
 	am_endif();
-
+#endif
+#if	defined(CONFIG_OS_LINUX)
 	am_cond("CONFIG_OS_LINUX");
 	am_config_add("AM_CFLAGS","-DOS_LINUX");
 	am_endif();
-
+#endif
+#if	defined(CONFIG_OS_MAC_X)
 	am_cond("CONFIG_MAC_OS_X");
 	am_config_add("AM_CFLAGS","-DMAC_OS_X");
 	am_endif();
+#endif
+#if	defined(CONFIG_WINDOWS)
+#endif
 
-
+#if	defined(CONFIG_OS_OTHER)
+#endif
 }
 
 void api_headers(void)
@@ -206,21 +213,26 @@ void	Makefile_am(void)
 	newline();
 	am_config("LIB_CFLAGS", "");
 	newline();
+#if	defined(CONFIG_OPENSSL)
 	am_use_cond("OPENSSL");
 		am_config_add("AM_CFLAGS",	"-DUSE_SSL");
 		am_config_add("LIB_CFLAGS",	"$(OPENSSL_CFLAGS)");
 	am_endif();
-
+#endif
+#if	defined(CONFIG_PTHREAD)
 	am_use_cond("PTHREAD");
 		am_config_add("AM_CFLAGS",	"-pthread");
 		am_config_add("LIB_CFLAGS",	"$(PTHREAD_CFLAGS)");
 	am_endif();
+#endif
 
+#if	defined(CONFIG_DEBUG)
 	am_cond("CONFIG_DEBUG");
 		am_config_add("AM_CFLAGS",	"-g -O0 -DDEBUG -DCONFIG_DEBUG");
 	am_else();
 		am_config_add("AM_CFLAGS",	"-O2");
 	am_endif();
+#endif
 
 #include	"user/user-code-am.inc"
 	newline();
