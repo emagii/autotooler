@@ -44,7 +44,7 @@
 #include	<stdbool.h>
 #include	"autoconf.h"
 
-#define		CHECK_HEADERS_FILE	"user/user-headers.inc"
+#define		CHECK_HEADERS_FILE	"user/user-headers-ac.inc"
 #define		min(a, b)	(a<b?a:b)
 FILE	*c_ac;
 
