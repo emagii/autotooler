@@ -236,6 +236,9 @@ void	Makefile_am(void)
 #include	"user/user-code-am.inc"
 	newline();
 	am_config_add("AM_CFLAGS",				"$(LIB_CFLAGS)");
+	am_config_add("AM_CFLAGS",				"-Isrc");
+	am_config_add("AM_CFLAGS",				"-Isrc/include");
+	am_config_add("AM_CFLAGS",				"-Iinclude");
 	newline();
 	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
