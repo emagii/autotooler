@@ -2,31 +2,36 @@
 #if	0
 /*
  * Automatically generated C config: don't edit
- * Sat Sep 30 11:33:07 2017
+ * Mon Oct  2 22:28:59 2017
  */
 #define CONFIG_SHARED_LIB 1
-#define CONFIG_PTHREAD 1
 #define CONFIG_LIBRARY 1
-#define CONFIG_PROJECT "library"
-#define CONFIG_ZIP_V2_VAR "zip-v2"
+#define CONFIG_PROJECT "libed25519-donna"
+#define CONFIG_WORKDIR "${HOME}/projects/autotooler"
 #define CONFIG_OPENSSL 1
+#define TARGET_PLATFORM_RASPBERRYPI 1
 #define CONFIG_COPYRIGHT_DATE "2017"
+#define TARGET_PLATFORM_MT7620 1
 #define CONFIG_HOMEPAGE "http://www.emagii.com/"
 #define CONFIG_DEBUG 1
+#define TARGET_PLATFORM_PC 1
+#define CONFIG_LIBRARY_INSTALLDIR ""
 #define HAVE_DOT_CONFIG 1
 #define CONFIG_AC_PRERQ "2.59"
 #define CONFIG_OS_LINUX 1
-#define CONFIG_LIBRARY_NAME "lib<x>"
+#define CONFIG_LIBRARY_NAME "libed25519-donna"
+#define TARGET_PLATFORM_BEAGLEBONE 1
 #define CONFIG_AUTHOR_EMAIL "ulf@emagii.com"
 #define CONFIG_LIBRARY_VERSION "1.0"
 #define CONFIG_AC_CONFIG_HEADER "src/include/config.h"
-#define CONFIG_OS "Linux"
 #define CONFIG_AC_CONFIG_MACRO_DIR "m4"
 #define CONFIG_DEBUG_VAR "debug"
+#define CONFIG_PROJECT_TYPE "library"
 #define CONFIG_SRCDIR "src"
-#define CONFIG_AUTHOR "Ulf Samuelsson <ulf@emagii.com>"
+#define CONFIG_SRC_URI_REPO ""
+#define CONFIG_AUTHOR "Ulf Samuelsson"
+#define CONFIG_SRC_URI_HOST "https://www.github.com/emagii"
 #define CONFIG_AM_INIT_AUTOMAKE "1.10 -Wall no-define"
-#define CONFIG_ZIP_V2 1
 
 #endif
 
@@ -36,6 +41,7 @@
 #include	<stdbool.h>
 #include	<assert.h>
 #include	"autoconf.h"
+#include	<malloc.h>
 
 #define	REQUIRED	1
 #define	OPTIONAL	0
@@ -81,12 +87,38 @@ void	am_endif(void)
 
 void	am_config(char	*var, char *value)
 {
-	fprintf(M_am, INDENT "= %s\n", var, value);
+	int	len = strlen(var);
+	char	*p = malloc(len+1);
+	int	i;
+	char	c;
+	for (i = 0 ; i <= len; i++) {
+		c=var[i];
+		if (c == '-') {
+			c = '_';
+		}
+		p[i] = c;
+	}
+
+	fprintf(M_am, INDENT "= %s\n", p, value);
+	free(p);
 }
 
 void	am_config_add(char	*var, char *value)
 {
-	fprintf(M_am, INDENT "+= %s\n", var, value);
+	int	len = strlen(var);
+	char	*p = malloc(len+1);
+	int	i;
+	char	c;
+	for (i = 0 ; i <= len; i++) {
+		c=var[i];
+		if (c == '-') {
+			c = '_';
+		}
+		p[i] = c;
+	}
+
+	fprintf(M_am, INDENT "+= %s\n", p, value);
+	free(p);
 }
 
 void	am_cppflags(void)
@@ -188,7 +220,9 @@ void	Makefile_am(void)
 {
 	char	version_info[32];
 	int	sts;
+
 	M_am	= fopen("Makefile.am", "w");
+
 	am_config("AUTOMAKE_OPTIONS",	"foreign nostdinc subdir-objects");
 	newline();
 	am_config("ACLOCAL_AMFLAGS",	"${ACLOCAL_FLAGS} -I m4");
