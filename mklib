@@ -94,6 +94,14 @@ init_repo ()
 	if ! [ -f autogen.sh ] ; then
 		install	-m 755 ../autotooler/scripts/autogen.sh	autogen.sh
 	fi
+
+	echo	"#!/bin/sh"					>	yocto
+	echo	"PREFIX=/usr/local/$REPO"			>>	yocto
+	echo	"sudo	mkdir			\${PREFIX}"	>>	yocto
+	echo	"sudo	chown	$USER:$USER	\${PREFIX}"	>>	yocto
+	echo	"./configure		--prefix=\${PREFIX}"	>>	yocto
+	chmod	a+x							yocto
+
 	popd				&>/dev/null
 }
 
@@ -137,6 +145,12 @@ init_config ()
 	popd				&>/dev/null
 }
 
+yocto_script ()
+{
+
+}
+
+
 purge
 source	./config.inc
 add_credentials
@@ -149,3 +163,5 @@ init_links
 if [ "x$DEFCONFIG" == "x" ] ; then
 	init_config
 fi
+
+
