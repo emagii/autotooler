@@ -81,6 +81,17 @@ init_repo ()
 	mkdir	-p		src/include
 	touch			src/include/config.h.in
 	touch			$REPO.pc.in
+
+
+	if	! [ -f AUTHORS ] ; then
+		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
+	fi
+	if ! [ -f autogen.sh ] ; then
+		install	-m 755 ../autotooler/scripts/autogen.sh	autogen.sh
+		git	add	autogen.sh
+		git	commit	-m "Adding autogen.sh" -s
+	fi
+
 	if	! [ -f AUTHORS ] ; then
 		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
 	fi
@@ -90,9 +101,15 @@ init_repo ()
 	touch			LICENSE
 	touch			NEWS
 	touch			README
-	touch			.gitignore
-	if ! [ -f autogen.sh ] ; then
-		install	-m 755 ../autotooler/scripts/autogen.sh	autogen.sh
+	git	add	AUTHORS	COPYING	ChangeLog	INSTALL	LICENSE	NEWS	README
+	if $(git	commit	-m "Autotools required files" -s) ; then
+		true
+	fi
+
+	if	! [ -f .gitignore ] ; then
+		cp	autotooler/gitignore	.gitignore
+		git	add	.gitignore
+		git	commit -m ".gitignore" -s
 	fi
 
 	echo	"#!/bin/sh"					>	yocto
@@ -101,7 +118,14 @@ init_repo ()
 	echo	"sudo	chown	$USER:$USER	\${PREFIX}"	>>	yocto
 	echo	"./configure		--prefix=\${PREFIX}"	>>	yocto
 	chmod	a+x							yocto
+	git	add	yocto
+	git	commit	-m "yocto ./configure test" -s
 
+	git	add	autotooler
+	git	commit	-m "autotooler default configuration (empty)" -s
+
+	git	add	$REPO.pc.in
+	git	commit	-m "$REPO.pc.in" -s
 	popd				&>/dev/null
 }
 
