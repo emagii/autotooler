@@ -1,0 +1,5 @@
+menu	"Check socket"
+config		CONFIG_LIB_SOCKET_SOCKET
+		bool	"socket"
+		default	n
+endmenu

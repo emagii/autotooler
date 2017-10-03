@@ -1,0 +1,7 @@
+menu	"Check Libraries"
+
+source	library/dl/Config.in
+source	library/nsl/Config.in
+source	library/socket/Config.in
+
+endmenu

@@ -1,0 +1,5 @@
+menu	"Check dl"
+config		CONFIG_LIB_DL_DLOPEN
+		bool	"dlopen"
+		default	n
+endmenu

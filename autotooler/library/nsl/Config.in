@@ -1,0 +1,5 @@
+menu	"Check nsl"
+config		CONFIG_LIB_NSL_GETHOSTBYNAME
+		bool	"gethostbyname"
+		default	n
+endmenu

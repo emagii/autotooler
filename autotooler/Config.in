@@ -142,6 +142,9 @@ config	CONFIG_PTHREAD
 
 source	"src/user/Config-libs.in"
 endmenu
+
+source	library/Config.in
+
 # ===============================================
 
 
