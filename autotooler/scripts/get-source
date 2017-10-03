@@ -1,0 +1,4 @@
+#!/bin/sh
+find	src -name '*.h' | sort	> autotooler/h-files
+find	src -name '*.c' | sort	> autotooler/c-files
+
