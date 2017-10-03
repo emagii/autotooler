@@ -57,7 +57,7 @@ void	sanitize_names(char *arg, int maxlen, char	*name, char *NAME)
 	int	i, len;
 	char	c;
 	len=strlen(arg);
-	for (i = 0; i < len ; i++) {	/* also copy trailing NULL char */
+	for (i = 0; i <= len ; i++) {	/* also copy trailing NULL char */
 		if (i >= maxlen) {
 			name[i] = '\0';
 			NAME[i] = '\0';
@@ -431,7 +431,6 @@ void	configure_ac(void)
 	ac_simple("AC_PROG_LN_S");
 	ac_simple("AC_PROG_CPP");
 	ac_simple("AC_PROG_CC");
-	ac_simple("AC_PROGRAM_INSTALL");
 	ac_simple("AC_ARG_PROGRAM");
 	ac_config("AM_INIT_AUTOMAKE",	CONFIG_AM_INIT_AUTOMAKE);
 	ac_simple("AC_PROG_MAKE_SET");
