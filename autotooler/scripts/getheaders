@@ -26,3 +26,22 @@ grep include *.c | \
 	sed -e	's/^/\t/g'			| \
 	sort					| \
 	uniq					> files
+
+cd	include
+grep include *.h | \
+	sed -e	's%//.*$%%g'			| \
+	sed -e	'/^\s*$/d'			| \
+	sed -e	's/^.*:\s*//g'			| \
+	sed -e	's/^[#]\s*include\s*//g'	| \
+	sed -e	's/^<//g'			| \
+	sed -e	's/^"//g'			| \
+	sed -e	's/".*/ \\/g'			| \
+	sed -e	's/>.*/ \\/g'			| \
+	sed -e	's%^[.]*/include/%%g'		| \
+	sed -e	's%\s*$%%g'			| \
+	sed -e	's%$%%g'			| \
+	sed -e	'/^[[:space:]]*$/d'		| \
+	sed -e	's/^/\t/g'			| \
+	sort					| \
+	uniq					>> ../files
+

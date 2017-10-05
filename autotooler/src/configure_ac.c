@@ -250,7 +250,7 @@ void	ac_arg_enable(char *arg, char *help, bool lib)
  *		.var		"	"OPENSSL"
  *		.libname	=	"ssl",
  *		.name		=	"OpenSSL",
- *		.path		=	"/usr/lib",
+ *		.prefix		=	"/usr",
  *		.flags		=	F_CC,
  *		.def		=	YES
  *	);
@@ -289,7 +289,7 @@ void	ac_arg_with_default(char *library, char *var, char *libname, char *name, ch
 	fprintf(c_ac,	"if test \"$with_%s\" != \"no\"\n", library_sanitized);
 	fprintf(c_ac,	"then\n");
 			fprintf(c_ac,	"\t");
-			ac_define(var);
+			ac_define3(var,"[]","[]");
 	fprintf(c_ac,	"\t"	"LIBS=\"-l%s ${LIBS}\"\n",libname);
 	fprintf(c_ac,	"\t"	"if test -n \"$%sDIR\" -a \"$%sDIR\" != \"yes\"; then\n", LIBRARY, LIBRARY);
 	fprintf(c_ac,	"\t\t"		"LIBS=\"-L$%sDIR/.libs -L$%sDIR/lib -L$%sDIR $LIBS\"\n", LIBRARY, LIBRARY, LIBRARY);
