@@ -509,7 +509,7 @@ void	configure_ac(void)
 	ac_arg_enable("os-linux",		"Build for Linux enabled", false);
 #endif
 #if	defined(CONFIG_OS_MAC_X)
-	ac_arg_enable("mac-os-x",	"Build for Mac OS X enabled", false);examples
+	ac_arg_enable("mac-os-x",	"Build for Mac OS X enabled", false);
 #endif
 #if	defined(CONFIG_OS_WINDOWS)
 	ac_arg_enable("os-windows",	"Build for Windows enabled", false);
