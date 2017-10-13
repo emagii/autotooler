@@ -40,7 +40,7 @@ choice
 	prompt "Build Target"
 	default CONFIG_SHARED_LIB
 
-config	CONFIG_PROGRAM
+config	CONFIG_APP
 	bool "Build an Application"
 	help
 	  Use this mode to load an second level boot monitor
@@ -72,7 +72,7 @@ if	CONFIG_LIBRARY
 menu "Library Setup"
 
 config	CONFIG_LIBRARY_NAME
-	string "library name"
+	string "Library Name"
 	default "lib<x>"
 	
 config	CONFIG_LIBRARY_VERSION
@@ -82,6 +82,54 @@ config	CONFIG_LIBRARY_VERSION
 config	CONFIG_LIBRARY_INSTALLDIR
 	string "Library Header Install directory"
 	default ""
+
+config	CONFIG_LIBRARY_UNIT_TEST
+	bool	"Unit Test"
+	default	n
+	help
+	  Is there an application to test the library?
+	  (Not Yet Supported)
+
+if	CONFIG_LIBRARY_UNIT_TEST
+config	CONFIG_LIBRARY_UNIT_TEST_NAME
+	string	"Unit Test Name"
+	default	""
+	help
+	  (Not Yet Supported)
+
+endif
+
+endmenu
+endif
+
+if	CONFIG_APP
+menu "Program Setup"
+
+config	CONFIG_APP_NAME
+	string "Application Name"
+	default "myapp"
+
+config	CONFIG_APP_VERSION
+	string "Application Version"
+	default "1.0"
+
+config	CONFIG_APP_EXTRA
+	bool	"Additional Applications"
+	default	n
+
+if	CONFIG_APP_EXTRA
+config	CONFIG_APP_EXTRA_APPS
+	string	"<app1> {, <app2> }"
+	help
+	  Comma separated list of applications to build
+
+config	CONFIG_APP_EXTRA_LIBS
+	string	"<lib1> { , <lib2> }"
+	help
+	  Comma separated list of libraries to build
+	  (Not Yet Supported)
+
+endif
 
 endmenu
 endif
