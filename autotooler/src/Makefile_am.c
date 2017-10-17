@@ -51,7 +51,49 @@
 #endif
 
 #define		min(a, b)	(a<b?a:b)
+#if	defined(CONFIG_LIBRARY)
+#define	STRING_LEN	128
+char	library[STRING_LEN];
+char	LIBRARY[STRING_LEN];
+#endif
+
 FILE	*M_am;
+
+char	*concat(char *s1, char *s2)
+{
+	int	len1 = strlen(s1);
+	int	len2 = strlen(s2);
+	char	*s = malloc(len1+len2+1);
+	char	*p = s;
+	int	i;
+
+	for (i = 0 ; i < len1; i++) {
+		*p++ = *s1++;
+	}
+	for (i = 0 ; i <= len2; i++) {
+		*p++ = *s2++;
+	}
+	return	s;
+}
+
+void	sanitize_names(char *arg, int maxlen, char	*name, char *NAME)
+{
+	int	i, len;
+	char	c;
+	len=strlen(arg);
+	for (i = 0; i <= len ; i++) {	/* also copy trailing NULL char */
+		if (i >= maxlen) {
+			name[i] = '\0';
+			NAME[i] = '\0';
+			break;
+		}
+		c = arg[i];
+		if (c == '-')
+			c = '_';
+		name[i] = c;
+		NAME[i] = toupper(c);
+	}
+}
 
 #define	INDENT	"%-24s"
 void	newline(void)
@@ -101,6 +143,13 @@ void	am_config(char	*var, char *value)
 
 	fprintf(M_am, INDENT "= %s\n", p, value);
 	free(p);
+}
+
+void	am_config2(char *var1, char *var2, char *value)
+{
+	char	*name = concat(var1,var2);
+	am_config(name, value);
+	free(name);
 }
 
 void	am_config_add(char	*var, char *value)
@@ -222,7 +271,6 @@ void	Makefile_am(void)
 	int	sts;
 
 	M_am	= fopen("Makefile.am", "w");
-
 	am_config("AUTOMAKE_OPTIONS",	"foreign nostdinc subdir-objects");
 	newline();
 	am_config("ACLOCAL_AMFLAGS",	"${ACLOCAL_FLAGS} -I m4");
@@ -231,6 +279,10 @@ void	Makefile_am(void)
 	am_config("AM_LDFLAGS","");
 	am_cppflags();
 	newline();
+#if	defined(CONFIG_LIBRARY)
+	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
+	am_config2(LIBRARY,"_VERSION", "$(VERSION)");
+#endif
 	am_config("lib_LTLIBRARIES", CONFIG_LIBRARY_NAME ".la");
 	newline();
 	am_config("CLEANFILES","");

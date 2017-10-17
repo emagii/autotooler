@@ -48,9 +48,29 @@
 #define		min(a, b)	(a<b?a:b)
 FILE	*c_ac;
 #define	STRING_LEN	128
+char	LIBRARY[STRING_LEN];
+char	library[STRING_LEN];
+
+#define	INDENT	"%-24s"
 
 #define	F_CC	(1 << 0)
 #define	F_CXX	(1 << 1)
+char	*concat(char *s1, char *s2)
+{
+	int	len1 = strlen(s1);
+	int	len2 = strlen(s2);
+	char	*s = malloc(len1+len2+1);
+	char	*p = s;
+	int	i;
+
+	for (i = 0 ; i < len1; i++) {
+		*p++ = *s1++;
+	}
+	for (i = 0 ; i <= len2; i++) {
+		*p++ = *s2++;
+	}
+	return	s;
+}
 
 void	sanitize_names(char *arg, int maxlen, char	*name, char *NAME)
 {
@@ -63,7 +83,6 @@ void	sanitize_names(char *arg, int maxlen, char	*name, char *NAME)
 			NAME[i] = '\0';
 			break;
 		}
-//		printf("i=%d\n",i);
 		c = arg[i];
 		if (c == '-')
 			c = '_';
@@ -80,6 +99,18 @@ void	ac_simple(char	*s)
 void	newline(void)
 {
 	ac_simple("");
+}
+
+void	ac_assign(char	*var, char *value)
+{
+	fprintf(c_ac, INDENT "= %s\n", var, value);
+}
+
+void	ac_assign2(char	*var1, char *var2, char *value)
+{
+	char	*name = concat(var1, var2);
+	ac_assign(name, value);
+	free(name);
 }
 
 void	ac_init(void)
@@ -102,6 +133,21 @@ void	ac_define(char *var)
 void	ac_subst(char *var)
 {
 	fprintf(c_ac, "AC_SUBST(%s)\n", var);
+}
+
+void	ac_subst2(char *var1, char *var2)
+{
+	fprintf(c_ac, "AC_SUBST(%s%s)\n", var1, var2);
+}
+
+void	ac_subst_val(char *var, char *value)
+{
+	fprintf(c_ac, "AC_SUBST(%s, %s)\n", var, value);
+}
+
+void	ac_subst2_val(char *var1, char *var2, char *value)
+{
+	fprintf(c_ac, "AC_SUBST(%s%s, %s)\n", var1, var2, value);
 }
 
 void	ac_define3(char *var, char *value, char *description)
@@ -412,6 +458,10 @@ getcwd(path, MAX_PATH_LENGTH);
 printf("Current Directory = %s", path);
 #endif
 
+void	ac_set_version()
+{
+}
+
 void	configure_ac(void)
 {
 	c_ac	= fopen("configure.ac", "w");
@@ -435,6 +485,9 @@ void	configure_ac(void)
 	ac_config("AM_INIT_AUTOMAKE",	CONFIG_AM_INIT_AUTOMAKE);
 	ac_simple("AC_PROG_MAKE_SET");
 	ac_simple("AM_MAINTAINER_MODE");
+	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
+	ac_subst2_val(LIBRARY, "_VERSION", CONFIG_LIBRARY_VERSION);
+
 	ac_simple("AC_HEADER_STDC");
 #if	defined(CONFIG_SHARED_LIB)
 	ac_simple("AC_ENABLE_SHARED");
@@ -528,6 +581,9 @@ void	configure_ac(void)
 #endif
 #include "library/libraries.inc"
 #include "user/user-code-ac.inc"
+
+	ac_assign2(LIBRARY, "_LIBS", "$(LIBS)");
+	ac_subst2(LIBRARY, "_LIBS");
 
 	ac_config("AC_SUBST",		"CFLAGS");
 	ac_config("AC_MSG_RESULT",	"$build_tests");
