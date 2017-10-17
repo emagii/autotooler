@@ -649,8 +649,10 @@ void	configure_ac(void)
 #include "library/libraries.inc"
 #include "user/user-code-ac.inc"
 
+#ifdef	CONFIG_LIBRARY
 	ac_assign2(LIBRARY, "_LIBS", "$(LIBS)");
 	ac_subst2(LIBRARY, "_LIBS");
+#endif
 
 	ac_config("AC_SUBST",		"CFLAGS");
 	ac_config("AC_SUBST",		"CPPFLAGS");
