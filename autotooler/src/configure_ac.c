@@ -569,8 +569,8 @@ void	configure_ac(void)
 
 //	ac_simple("LIBS = '-Lsimple'");
 //	ac_simple("CPPFLAGS = '-Isimple'");
-	ac_simple("LIBS =");
-	ac_simple("CPPFLAGS =");
+//	ac_simple("LIBS =");
+//	ac_simple("CPPFLAGS =");
 
 	newline();
 	ac_check_headers(CHECK_HEADERS_FILE);
@@ -650,8 +650,8 @@ void	configure_ac(void)
 #include "user/user-code-ac.inc"
 
 #ifdef	CONFIG_LIBRARY
-	ac_assign2(LIBRARY, "_LIBS", "$(LIBS)");
-	ac_subst2(LIBRARY, "_LIBS");
+//	ac_assign2(LIBRARY, "_LIBS", "$(LIBS)");
+	ac_subst2_val(LIBRARY, "_LIBS", "[$LIBS]");
 #endif
 
 	ac_config("AC_SUBST",		"CFLAGS");

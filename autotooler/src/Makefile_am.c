@@ -456,6 +456,7 @@ void	Makefile_am(void)
 #if	defined(CONFIG_LIBRARY)
 	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
 	am_config2(LIBRARY,"_VERSION", "$(VERSION)");
+	am_config2(LIBRARY,"_LIBS", "$(LIBS)");
 	am_config("lib_LTLIBRARIES", CONFIG_LIBRARY_NAME ".la");
 	newline();
 #endif
@@ -469,7 +470,7 @@ void	Makefile_am(void)
 #endif
 	am_config("CLEANFILES","");
 	newline();
-#if	defined(CONFIG_LIBRARIES)
+#if	defined(CONFIG_LIBRARY)
 	am_config("pkgconfigdir", "$(libdir)/pkgconfig");
 	am_config("pkgconfig_DATA", CONFIG_LIBRARY_NAME ".pc");
 #endif
@@ -480,7 +481,7 @@ void	Makefile_am(void)
 
 	os_select();
 	newline();
-#if	defined(CONFIG_LIBRARIES)
+#if	defined(CONFIG_LIBRARY)
 	am_config("LIB_CFLAGS", "");
 	newline();
 #endif
@@ -502,7 +503,7 @@ void	Makefile_am(void)
 		am_config_add("LIB_CFLAGS",	"$(PTHREAD_CFLAGS)");
 	am_endif();
 #endif
-#if	defined(CONFIG_LIBRARIES)
+#if	defined(CONFIG_LIBRARY)
 	am_config("LIB_CFLAGS", "$(LIBS)");
 	newline();
 #endif
@@ -542,7 +543,7 @@ void	Makefile_am(void)
 		goto	exit;
 	}
 
-#if	defined(CONFIG_LIBRARIES)
+#if	defined(CONFIG_LIBRARY)
 	am_config(CONFIG_LIBRARY_NAME "_la_SOURCES",		"$(CSOURCES) $(HHEADERS)");
 
 #if	defined(CONFIG_INCLUDE_DIR)
