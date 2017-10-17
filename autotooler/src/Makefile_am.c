@@ -450,7 +450,7 @@ void	Makefile_am(void)
 	get_extra_apps();
 	am_config("AUTOMAKE_OPTIONS",	"foreign nostdinc subdir-objects");
 	newline();
-	am_config("ACLOCAL_AMFLAGS",	"${ACLOCAL_FLAGS} -I m4");
+	am_config("ACLOCAL_AMFLAGS",	"$(ACLOCAL_FLAGS) -I m4");
 	newline();
 	am_config("AM_CFLAGS","");
 	am_config("AM_LDFLAGS","$(LIBS)");

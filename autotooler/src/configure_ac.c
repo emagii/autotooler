@@ -560,6 +560,8 @@ void	configure_ac(void)
 	ac_simple("AC_ENABLE_STATIC");
 #endif
 	ac_simple("AC_PROG_LIBTOOL");
+	ac_simple("dnl make sure we keep ACLOCAL_FLAGS around for maintainer builds to work");
+	ac_simple("AC_SUBST(ACLOCAL_AMFLAGS, \"$ACLOCAL_FLAGS\")");
 	ac_simple("AC_HEADER_STDC");
 
 	ac_simple("AC_C_CONST");
