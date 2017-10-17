@@ -375,19 +375,23 @@ void	am_config2(char *app, char	*var, char *value)
 }
 #endif
 
+app_flags(void)
+{
 #if	defined(CONFIG_APP)
-app_flags(char *app,bool main)
-{
-	am_config2(CONFIG_APP_NAME, "_LDFLAGS",		"AM_LDFLAGS");
-	am_config2(CONFIG_APP_NAME, "_CFLAGS",		"AM_CFLAGS");
-	am_config2(CONFIG_APP_NAME, "_CPPFLAGS",	"AM_CPPFLAGS");
-	am_config2(CONFIG_APP_NAME, "_LDADD",		"LIB_CFLAGS");
-}
-#else
-app_flags(char *app,bool main)
-{
-}
+	am_config(CONFIG_APP_NAME "_LDFLAGS",			"$(AM_LDFLAGS)");
+	am_config(CONFIG_APP_NAME "_CFLAGS",			"$(AM_CFLAGS)");
+	am_config(CONFIG_APP_NAME "_CPPFLAGS",			"$(AM_CPPFLAGS)");
+	am_config(CONFIG_APP_NAME "_LDAPP",			"$(LIB_CFLAGS)");
 #endif
+#if	defined(CONFIG_LIBRARY)
+	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
+	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
+	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
+
+	am_lib_installdir();
+#endif
+
+}
 
 #if	defined(CONFIG_APP)
 const	char	*config_app_extra_apps = CONFIG_APP_EXTRA_APPS;
@@ -451,7 +455,7 @@ void	Makefile_am(void)
 	am_config("AM_CFLAGS","");
 	am_config("AM_LDFLAGS","$(LIBS)");
 	am_cppflags();
-	am_config("LIB_CFLAGS","");
+	am_config("LIB_CFLAGS","$(LIBS)");
 	newline();
 #if	defined(CONFIG_LIBRARY)
 	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
@@ -481,10 +485,6 @@ void	Makefile_am(void)
 
 	os_select();
 	newline();
-#if	defined(CONFIG_LIBRARY)
-	am_config("LIB_CFLAGS", "");
-	newline();
-#endif
 #if	defined(CONFIG_OPENSSL)
 	am_use_cond("OPENSSL");
 		am_config_add("AM_CFLAGS",	"-DUSE_SSL");
@@ -503,10 +503,6 @@ void	Makefile_am(void)
 		am_config_add("LIB_CFLAGS",	"$(PTHREAD_CFLAGS)");
 	am_endif();
 #endif
-#if	defined(CONFIG_LIBRARY)
-	am_config("LIB_CFLAGS", "$(LIBS)");
-	newline();
-#endif
 #if	defined(CONFIG_DEBUG)
 	am_cond("CONFIG_DEBUG");
 		am_config_add("AM_CFLAGS",	"-g -O0 -DDEBUG -DCONFIG_DEBUG");
@@ -522,19 +518,7 @@ void	Makefile_am(void)
 	am_config_add("AM_CFLAGS",				"-Isrc/include");
 	am_config_add("AM_CFLAGS",				"-Iinclude");
 	newline();
-#if	defined(CONFIG_LIBRARY)
-	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
-	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
-	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
-
-	am_lib_installdir();
-#endif
-#if	defined(CONFIG_APP)
-	am_config(CONFIG_APP_NAME "_LDFLAGS",		"$(AM_LDFLAGS)");
-	am_config(CONFIG_APP_NAME "_CFLAGS",		"$(AM_CFLAGS)");
-	am_config(CONFIG_APP_NAME "_CPPFLAGS",		"$(AM_CPPFLAGS)");
-	am_config(CONFIG_APP_NAME "_LDAPP",		"$(LIB_CFLAGS)");
-#endif
+	app_flags();
 
 	raw("# 'csource+headers-am.inc' provides the CSOURCES, HHEADERS and INSTALL_HEADERS defines");
 
