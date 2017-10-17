@@ -297,6 +297,7 @@ void api_headers(void)
 	}
 	fclose(API);
 }
+#else
 void api_headers(void)
 {
 }
@@ -374,6 +375,7 @@ void	am_config2(char *app, char	*var, char *value)
 }
 #endif
 
+#if	defined(CONFIG_APP)
 app_flags(char *app,bool main)
 {
 	am_config2(CONFIG_APP_NAME, "_LDFLAGS",		"AM_LDFLAGS");
@@ -381,6 +383,13 @@ app_flags(char *app,bool main)
 	am_config2(CONFIG_APP_NAME, "_CPPFLAGS",	"AM_CPPFLAGS");
 	am_config2(CONFIG_APP_NAME, "_LDADD",		"LIB_CFLAGS");
 }
+#else
+app_flags(char *app,bool main)
+{
+}
+#endif
+
+#if	defined(CONFIG_APP)
 const	char	*config_app_extra_apps = CONFIG_APP_EXTRA_APPS;
 
 void	get_extra_apps (void)
@@ -421,6 +430,11 @@ add_apps ()
 		am_config_add("bin_PROGRAMS", p);
 	}
 }
+#else
+void	get_extra_apps (void)
+{
+}
+#endif
 
 void	Makefile_am(void)
 {
