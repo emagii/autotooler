@@ -113,7 +113,8 @@ void	ac_assign2(char	*var1, char *var2, char *value)
 	free(name);
 }
 
-void	ac_init(void)
+#if	defined(CONFIG_LIBRARY)
+void	ac_init_library(void)
 {
 	fprintf(c_ac, "AC_INIT(");
 	fprintf(c_ac, "[%s],\n", CONFIG_LIBRARY_NAME);
@@ -123,6 +124,30 @@ void	ac_init(void)
 	fprintf(c_ac, "\t[%s]", CONFIG_HOMEPAGE);
 	fprintf(c_ac, ")\n");
 	newline();
+}
+#endif
+#if	defined(CONFIG_APP)
+void	ac_init_app(void)
+{
+	fprintf(c_ac, "AC_INIT(");
+	fprintf(c_ac, "[%s],\n", CONFIG_APP_NAME);
+	fprintf(c_ac, "\t[%s],\n", CONFIG_APP_VERSION);
+	fprintf(c_ac, "\t[%s],\n", CONFIG_AUTHOR);
+	fprintf(c_ac, "\t[%s-%s],\n", CONFIG_APP_NAME, CONFIG_APP_VERSION);
+	fprintf(c_ac, "\t[%s]", CONFIG_HOMEPAGE);
+	fprintf(c_ac, ")\n");
+	newline();
+}
+#endif
+
+void	ac_init(void)
+{
+#if	defined(CONFIG_LIBRARY)
+	ac_init_library();
+#endif
+#if	defined(CONFIG_APP)
+	ac_init_app();
+#endif
 }
 
 void	ac_define(char *var)
@@ -310,7 +335,7 @@ void	ac_arg_with_default(char *library, char *var, char *libname, char *name, ch
 	char	*symbol;
 //	printf("ac_arg_with_default");
 	sanitize_names(library, STRING_LEN-1, library_sanitized, LIBRARY);
-	fprintf(c_ac, "AC_ARG_WITH(%s,\n", library);
+	fprintf(c_ac, "AC_ARG_WITH([%s],\n", library);
 #if	0
 	fprintf(c_ac, "\t"
 		"[AS_HELP_STRING("
@@ -326,7 +351,7 @@ void	ac_arg_with_default(char *library, char *var, char *libname, char *name, ch
 	}
 	fprintf(c_ac, "],\n");
 #endif
-	fprintf(c_ac, "\t"	"%sDIR=$withwal", LIBRARY);
+	fprintf(c_ac, "\t"	"%sDIR=$withval", LIBRARY);
 	if (def > 0) {
 		fprintf(c_ac, "\t"	", with_%s=%s\n", library_sanitized, 0?"yes":"no");
 	}
@@ -337,7 +362,7 @@ void	ac_arg_with_default(char *library, char *var, char *libname, char *name, ch
 			fprintf(c_ac,	"\t");
 			ac_define3(var,"[]","[]");
 	fprintf(c_ac,	"\t"	"LIBS=\"-l%s ${LIBS}\"\n",libname);
-	fprintf(c_ac,	"\t"	"if test -n \"$%sDIR\" -a \"$%sDIR\" != \"yes\"; then\n", LIBRARY, LIBRARY);
+	fprintf(c_ac,	"\t"	"if test \"$%sDIR\" -a \"$%sDIR\" != \"yes\"; then\n", LIBRARY, LIBRARY);
 	fprintf(c_ac,	"\t\t"		"LIBS=\"-L$%sDIR/.libs -L$%sDIR/lib -L$%sDIR $LIBS\"\n", LIBRARY, LIBRARY, LIBRARY);
 	fprintf(c_ac,	"\t\t"		"CPPFLAGS=\"-I$%sDIR/include $CPPFLAGS\" \n", LIBRARY);
 	fprintf(c_ac,	"\t"	"fi\n");
@@ -346,12 +371,46 @@ void	ac_arg_with_default(char *library, char *var, char *libname, char *name, ch
 }
 
 /*	Typical call
- *	ac_arg_with_default(
+ *	ac_arg_with_library_default(
+ *		.library	=	"openssl",
+ *		.var		"	"OPENSSL"
+ *		.libname	=	"ssl",
+ *		.name		=	"OpenSSL",
+ *		.prefix		=	"/usr",
+ *		.flags		=	F_CC,
+ *		.def		=	YES
+ *	);
+ */
+void	ac_arg_with_library_default(char *library, char *var, char *libname, char *name, char *prefix, int flags, int def)
+{
+	int	i,len;
+	char	library_sanitized[STRING_LEN];
+	char	LIBRARY[STRING_LEN];
+	char	c;
+	char	*symbol;
+//	printf("ac_arg_with_default");
+	sanitize_names(library, STRING_LEN-1, library_sanitized, LIBRARY);
+	fprintf(c_ac, "AC_ARG_WITH(\n");
+	fprintf(c_ac, "\t[%s-library],\n", library);
+	fprintf(c_ac, "\t"	"AC_HELP_STRING("					"\n");
+	fprintf(c_ac, "\t\t"		"[--with-%s-library],"				"\n", library);
+	fprintf(c_ac, "\t\t"		"[Build with specified (static) library.]"	"\n");
+	fprintf(c_ac, "\t"	"),"							"\n");
+
+	fprintf(c_ac, "\t"	"[%s_LIBRARY=$with_%s]"					"\n", LIBRARY, library_sanitized);
+	fprintf(c_ac, "\t"	"[%s_LIBRARY=\"-l%s\"]"					"\n", LIBRARY, libname);
+	fprintf(c_ac, ")"								"\n");
+	newline();
+	ac_subst2(LIBRARY, "_LIBRARY");
+}
+
+/*	Typical call
+ *	ac_arg_with(
  *		.library	=	"openssl",
  *		.libname	=	"ssl",
  *		.name		=	"OpenSSL",
  *		.path		=	"/usr/lib",
- *		.flags		=	F_CC,
+ *		.flags		=	F_CC|F_CXX
  *	);
  */
 void	ac_arg_with(char *library, char *var, char *libname, char *name, char *prefix, int flags)
@@ -360,7 +419,7 @@ void	ac_arg_with(char *library, char *var, char *libname, char *name, char *pref
 }
 
 /*	Typical call
- *	ac_arg_with_include_path(
+ *	ac_arg_with_include(
  *		.library	=	"openssl",
  *		.libname		=	"ssl",
  *		.name		=	"OpenSSL",
@@ -396,7 +455,7 @@ void	ac_arg_with_include (char *library, char *libname, char *name, char *path, 
 	fprintf(c_ac, "\t[%s_%s=\"-I$withval\"],\n",	LIBRARY, symbol);
 	fprintf(c_ac, "\t[%s_%s=\"-I%s\"])\n",		LIBRARY, symbol,  path);
 
-	fprintf(c_ac, "AC_SUBST([%s_CFLAGS])\n", LIBRARY);
+	fprintf(c_ac, "AC_SUBST([%s_%s])\n", LIBRARY, symbol);
 	newline();
 }
 
@@ -429,7 +488,7 @@ void	ac_arg_with_lib_path(char *library, char *libname,char *name, char *path, i
 		path);
 	sanitize_names(library, STRING_LEN-1, library_sanitized, LIBRARY);
 
-	fprintf(c_ac, "\t[%s_LIBS=\"-L$withval -l%s\"],\n", LIBRARY, libname);
+	fprintf(c_ac, "\t[%s_LIBS=\"-L$withval -l%s\"],\n", LIBRARY , /* library_sanitized, */libname);
 	fprintf(c_ac, "\t[%s_LIBS=\"-L%s -l%s\"])\n", LIBRARY, path, libname);
 
 	fprintf(c_ac, "AC_SUBST([%s_LIBS])\n", LIBRARY);
@@ -446,8 +505,10 @@ void	pkg_check_modules(char *name, char *lib, char *min_version)
 
 void	ac_config_files()
 {
-	fprintf(c_ac, "AC_CONFIG_FILES([Makefile ");
+	fprintf(c_ac, "AC_CONFIG_FILES([Makefile");
+#if	defined(CONFIG_LIBRARY)
 	fprintf(c_ac, " %s.pc", CONFIG_LIBRARY_NAME);
+#endif
 	fprintf(c_ac, "])\n");
 }
 
@@ -485,9 +546,10 @@ void	configure_ac(void)
 	ac_config("AM_INIT_AUTOMAKE",	CONFIG_AM_INIT_AUTOMAKE);
 	ac_simple("AC_PROG_MAKE_SET");
 	ac_simple("AM_MAINTAINER_MODE");
+#if	defined(CONFIG_LIBRARY)
 	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
 	ac_subst2_val(LIBRARY, "_VERSION", CONFIG_LIBRARY_VERSION);
-
+#endif
 	ac_simple("AC_HEADER_STDC");
 #if	defined(CONFIG_SHARED_LIB)
 	ac_simple("AC_ENABLE_SHARED");
@@ -504,6 +566,11 @@ void	configure_ac(void)
 	ac_simple("AC_TYPE_SIZE_T");
 	ac_simple("AC_HEADER_TIME");
 	ac_simple("");
+
+//	ac_simple("LIBS = '-Lsimple'");
+//	ac_simple("CPPFLAGS = '-Isimple'");
+	ac_simple("LIBS =");
+	ac_simple("CPPFLAGS =");
 
 	newline();
 	ac_check_headers(CHECK_HEADERS_FILE);
@@ -559,7 +626,7 @@ void	configure_ac(void)
 	ac_arg_enable("ios",		"Build for iOS enabled", false);
 #endif
 #if	defined(CONFIG_OS_LINUX)
-	ac_arg_enable("os-linux",		"Build for Linux enabled", false);
+	ac_arg_enable("os-linux",	"Build for Linux enabled", false);
 #endif
 #if	defined(CONFIG_OS_MAC_X)
 	ac_arg_enable("mac-os-x",	"Build for Mac OS X enabled", false);
@@ -586,6 +653,8 @@ void	configure_ac(void)
 	ac_subst2(LIBRARY, "_LIBS");
 
 	ac_config("AC_SUBST",		"CFLAGS");
+	ac_config("AC_SUBST",		"CPPFLAGS");
+	ac_config("AC_SUBST",		"LIBS");
 	ac_config("AC_MSG_RESULT",	"$build_tests");
 	ac_config_files();
 	ac_simple("AC_OUTPUT");

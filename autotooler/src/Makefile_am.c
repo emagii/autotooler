@@ -59,6 +59,67 @@ char	LIBRARY[STRING_LEN];
 
 FILE	*M_am;
 
+char	**extra_apps;
+/*
+ * From https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
+ * You can use the strtok() function to split a string (and specify the delimiter to use).
+ * Note that strtok() will modify the string passed into it.
+ * If the original string is required elsewhere make a copy of it and pass the copy to strtok().
+ * EDIT:
+ * Example (note it does not handle consecutive delimiters, "JAN,,,FEB,MAR" for example):
+ */
+
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    /* Count how many elements will be extracted. */
+    while (*tmp)
+    {
+        if (a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token. */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+
+    /* Add space for terminating null string so caller
+       knows where the list of returned strings ends. */
+    count++;
+
+    result = malloc(sizeof(char*) * count);
+
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            assert(idx < count);
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        assert(idx == count - 1);
+        *(result + idx) = 0;
+    }
+
+    return result;
+}
+
+
+#define	CONFIG_APP_CFLAGS	CONFIG_APP_NAME "_CFLAGS"
+
 char	*concat(char *s1, char *s2)
 {
 	int	len1 = strlen(s1);
@@ -170,11 +231,20 @@ void	am_config_add(char	*var, char *value)
 	free(p);
 }
 
+void	am_config_add_include(char	*var, char *value)
+{
+	char	buffer[256];
+	assert(strlen(value) < 250);
+	sprintf(buffer, "-I./%s", value);
+	am_config_add(var, buffer);
+}
+
 void	am_cppflags(void)
 {
 	fprintf(M_am, INDENT "-I$(%s) \\\n",	"AM_CPPFLAGS =",	"top_builddir");
 	fprintf(M_am, INDENT "-I$(%s) \\\n",	"",			"top_srcdir");
 	fprintf(M_am, INDENT "  $(%s)\n",	 	"",		"DEP_CFLAGS");
+	am_config_add("AM_CPPFLAGS",					"$(CPPFLAGS)");
 	newline();
 }
 
@@ -202,6 +272,7 @@ void	os_select()
 #endif
 }
 
+#if	defined(CONFIG_LIBRARY)
 void api_headers(void)
 {
 	FILE	*API	= fopen("api_headers.dat", "r");
@@ -226,6 +297,10 @@ void api_headers(void)
 	}
 	fclose(API);
 }
+void api_headers(void)
+{
+}
+#endif
 
 int	include_raw(char	*filename, int required)
 {
@@ -252,8 +327,8 @@ int	include_raw(char	*filename, int required)
 	return	0;
 }
 
-
-am_installdir ()
+#if	defined(CONFIG_LIBRARY)
+void am_lib_installdir ()
 {
 	char	*p = CONFIG_LIBRARY_INSTALLDIR;
 	char	*installdir;
@@ -264,6 +339,88 @@ am_installdir ()
 	}
 	am_config("INSTALLdir",		installdir);
 }
+#else
+void am_lib_installdir ()
+{
+}
+#endif
+
+#if	0
+void	am_config2(char *app, char	*var, char *value)
+{
+	int	alen = strlen(app);
+	int	vlen = strlen(var);
+	int	len  = alen + vlen + 2;
+	char	*p = malloc(len);
+	int	i;
+	char	c;
+	for (i = 0 ; i < alen; i++) {
+		c=var[i];
+		if (c == '-') {
+			c = '_';
+		}
+		*p++ = c;
+	}
+	for (i = 0; i <= vlen; i++) {	/* Include NULL at the end */
+		c=var[i];
+		if (c == '-') {
+			c = '_';
+		}
+		*p++ = c;
+	}
+
+	fprintf(M_am, INDENT "= %s\n", p, value);
+	free(p);
+}
+#endif
+
+app_flags(char *app,bool main)
+{
+	am_config2(CONFIG_APP_NAME, "_LDFLAGS",		"AM_LDFLAGS");
+	am_config2(CONFIG_APP_NAME, "_CFLAGS",		"AM_CFLAGS");
+	am_config2(CONFIG_APP_NAME, "_CPPFLAGS",	"AM_CPPFLAGS");
+	am_config2(CONFIG_APP_NAME, "_LDADD",		"LIB_CFLAGS");
+}
+const	char	*config_app_extra_apps = CONFIG_APP_EXTRA_APPS;
+
+void	get_extra_apps (void)
+{
+	int	srcix,len;
+	const char	*src;
+	char	c, *p, *dst, *config_app_extra_apps_clean;
+	char	**apps;
+
+	len = strlen(config_app_extra_apps);
+
+	config_app_extra_apps_clean = malloc(sizeof(char) * (len + 1));
+	if (config_app_extra_apps_clean) {
+		dst = config_app_extra_apps_clean;
+		src = config_app_extra_apps;
+		for (srcix = 0 ; srcix < len ; srcix++) {
+			c = *src++;
+			if (! isspace(c)) {
+				*dst++ = c;
+			}
+		}
+		*dst++ = '\0';
+		apps = str_split(config_app_extra_apps_clean, ',');
+		extra_apps = apps;
+		while(p = *apps++) {
+			printf("Adding %-40s%s\n", p, "[OK]");
+		}
+
+		free(config_app_extra_apps_clean);
+	}
+}
+
+add_apps ()
+{
+	char	**apps = extra_apps;
+	char	*p;
+	while(p = *apps++) {
+		am_config_add("bin_PROGRAMS", p);
+	}
+}
 
 void	Makefile_am(void)
 {
@@ -271,24 +428,37 @@ void	Makefile_am(void)
 	int	sts;
 
 	M_am	= fopen("Makefile.am", "w");
+
+	get_extra_apps();
 	am_config("AUTOMAKE_OPTIONS",	"foreign nostdinc subdir-objects");
 	newline();
 	am_config("ACLOCAL_AMFLAGS",	"${ACLOCAL_FLAGS} -I m4");
 	newline();
 	am_config("AM_CFLAGS","");
-	am_config("AM_LDFLAGS","");
+	am_config("AM_LDFLAGS","$(LIBS)");
 	am_cppflags();
+	am_config("LIB_CFLAGS","");
 	newline();
 #if	defined(CONFIG_LIBRARY)
 	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
 	am_config2(LIBRARY,"_VERSION", "$(VERSION)");
-#endif
 	am_config("lib_LTLIBRARIES", CONFIG_LIBRARY_NAME ".la");
 	newline();
+#endif
+#if	defined(CONFIG_APP)
+	am_config("bin_PROGRAMS", CONFIG_APP_NAME);
+	add_apps();
+//	TODO: Add support for scripts built as part of application
+//	am_config("bin_SCRIPTS", "");
+	am_config("sysconf_DATA", "");
+	am_config_add("AM_CFLAGS", "-Wall");
+#endif
 	am_config("CLEANFILES","");
 	newline();
+#if	defined(CONFIG_LIBRARIES)
 	am_config("pkgconfigdir", "$(libdir)/pkgconfig");
 	am_config("pkgconfig_DATA", CONFIG_LIBRARY_NAME ".pc");
+#endif
 	newline();
 	sprintf(version_info, "-version-info %s", CONFIG_VERSION_INFO);
 	am_config("VERSION_INFO", version_info);
@@ -296,12 +466,20 @@ void	Makefile_am(void)
 
 	os_select();
 	newline();
+#if	defined(CONFIG_LIBRARIES)
 	am_config("LIB_CFLAGS", "");
 	newline();
+#endif
 #if	defined(CONFIG_OPENSSL)
 	am_use_cond("OPENSSL");
 		am_config_add("AM_CFLAGS",	"-DUSE_SSL");
 		am_config_add("LIB_CFLAGS",	"$(OPENSSL_CFLAGS)");
+	am_endif();
+#endif
+#if	defined(CONFIG_CURL)
+	am_use_cond("CURL");
+		am_config_add("AM_CFLAGS",	"-DUSE_CURL");
+		am_config_add("LIB_CFLAGS",	"$(CURL_CXXFLAGS)");
 	am_endif();
 #endif
 #if	defined(CONFIG_PTHREAD)
@@ -310,7 +488,10 @@ void	Makefile_am(void)
 		am_config_add("LIB_CFLAGS",	"$(PTHREAD_CFLAGS)");
 	am_endif();
 #endif
-
+#if	defined(CONFIG_LIBRARIES)
+	am_config("LIB_CFLAGS", "$(LIBS)");
+	newline();
+#endif
 #if	defined(CONFIG_DEBUG)
 	am_cond("CONFIG_DEBUG");
 		am_config_add("AM_CFLAGS",	"-g -O0 -DDEBUG -DCONFIG_DEBUG");
@@ -326,11 +507,19 @@ void	Makefile_am(void)
 	am_config_add("AM_CFLAGS",				"-Isrc/include");
 	am_config_add("AM_CFLAGS",				"-Iinclude");
 	newline();
+#if	defined(CONFIG_LIBRARIES)
 	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
 
-	am_installdir();
+	am_lib_installdir();
+#endif
+#if	defined(CONFIG_APP)
+	am_config(CONFIG_APP_NAME "_LDFLAGS",		"$(AM_LDFLAGS)");
+	am_config(CONFIG_APP_NAME "_CFLAGS",		"$(AM_CFLAGS)");
+	am_config(CONFIG_APP_NAME "_CPPFLAGS",		"$(AM_CPPFLAGS)");
+	am_config(CONFIG_APP_NAME "_LDAPP",		"$(LIB_CFLAGS)");
+#endif
 
 	raw("# 'csource+headers-am.inc' provides the CSOURCES, HHEADERS and INSTALL_HEADERS defines");
 
@@ -339,6 +528,7 @@ void	Makefile_am(void)
 		goto	exit;
 	}
 
+#if	defined(CONFIG_LIBRARIES)
 	am_config(CONFIG_LIBRARY_NAME "_la_SOURCES",		"$(CSOURCES) $(HHEADERS)");
 
 #if	defined(CONFIG_INCLUDE_DIR)
@@ -348,6 +538,11 @@ void	Makefile_am(void)
 #endif
 
 	am_config(CONFIG_LIBRARY_NAME "_la_HEADERS",		"$(INSTALL_HEADERS)\n");
+#endif
+
+#if	defined(CONFIG_APP)
+	am_config(CONFIG_APP_NAME "_SOURCES",			"$(CSOURCES) $(HHEADERS)");
+#endif
 
 	raw("clean-local:");
 exit:
