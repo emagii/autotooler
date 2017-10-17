@@ -362,6 +362,7 @@ void	ac_arg_with_default(char *library, char *var, char *libname, char *name, ch
 			fprintf(c_ac,	"\t");
 			ac_define3(var,"[]","[]");
 	fprintf(c_ac,	"\t"	"LIBS=\"-l%s ${LIBS}\"\n",libname);
+	fprintf(c_ac,	"\t"	"SLIBS=\"-l%s ${SLIBS}\"\n",libname);
 	fprintf(c_ac,	"\t"	"if test \"$%sDIR\" -a \"$%sDIR\" != \"yes\"; then\n", LIBRARY, LIBRARY);
 	fprintf(c_ac,	"\t\t"		"LIBS=\"-L$%sDIR/.libs -L$%sDIR/lib -L$%sDIR $LIBS\"\n", LIBRARY, LIBRARY, LIBRARY);
 	fprintf(c_ac,	"\t\t"		"CPPFLAGS=\"-I$%sDIR/include $CPPFLAGS\" \n", LIBRARY);
@@ -569,11 +570,6 @@ void	configure_ac(void)
 	ac_simple("AC_HEADER_TIME");
 	ac_simple("");
 
-//	ac_simple("LIBS = '-Lsimple'");
-//	ac_simple("CPPFLAGS = '-Isimple'");
-//	ac_simple("LIBS =");
-//	ac_simple("CPPFLAGS =");
-
 	newline();
 	ac_check_headers(CHECK_HEADERS_FILE);
 
@@ -652,13 +648,13 @@ void	configure_ac(void)
 #include "user/user-code-ac.inc"
 
 #ifdef	CONFIG_LIBRARY
-//	ac_assign2(LIBRARY, "_LIBS", "$(LIBS)");
-	ac_subst2_val(LIBRARY, "_LIBS", "[$LIBS]");
+	ac_subst2_val(LIBRARY, "_LIBS", "[$SLIBS]");
 #endif
 
 	ac_config("AC_SUBST",		"CFLAGS");
 	ac_config("AC_SUBST",		"CPPFLAGS");
 	ac_config("AC_SUBST",		"LIBS");
+	ac_config("AC_SUBST",		"SLIBS");
 	ac_config("AC_MSG_RESULT",	"$build_tests");
 	ac_config_files();
 	ac_simple("AC_OUTPUT");

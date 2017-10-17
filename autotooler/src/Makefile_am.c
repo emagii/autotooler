@@ -460,7 +460,7 @@ void	Makefile_am(void)
 #if	defined(CONFIG_LIBRARY)
 	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
 	am_config2(LIBRARY,"_VERSION", "$(VERSION)");
-	am_config2(LIBRARY,"_LIBS", "$(LIBS)");
+	am_config2(LIBRARY,"_LIBS", "$(SLIBS)");
 	am_config("lib_LTLIBRARIES", CONFIG_LIBRARY_NAME ".la");
 	newline();
 #endif
