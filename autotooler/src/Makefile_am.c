@@ -521,7 +521,7 @@ void	Makefile_am(void)
 	am_config_add("AM_CFLAGS",				"-Isrc/include");
 	am_config_add("AM_CFLAGS",				"-Iinclude");
 	newline();
-#if	defined(CONFIG_LIBRARIES)
+#if	defined(CONFIG_LIBRARY)
 	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
