@@ -77,9 +77,9 @@ init_repo_autotooler ()
 }
 
 
-PKG_FILE=$REPO.pc.in
 pkg_config_file ()
 {
+	PKG_FILE=$REPO.pc.in
 	if ! [ -f $PKG_FILE ] ; then
 		touch	$PKG_FILE
 		printf	"prefix=@prefix@\n"				>> $PKG_FILE
