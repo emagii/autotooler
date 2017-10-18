@@ -1,7 +1,11 @@
 #!/bin/sh
 
-# Ease up on git use.
+toupper ()
+{
+	echo $1 | tr '[:lower:]' '[:upper:]'
+}
 
+# Ease up on git use.
 add_credentials ()
 {
 	git config credential.helper 'cache --timeout=36000'
@@ -72,6 +76,26 @@ init_repo_autotooler ()
 	fi
 }
 
+
+PKG_FILE=$REPO.pc.in
+pkg_config_file ()
+{
+	if ! [ -f $PKG_FILE ] ; then
+		touch	$PKG_FILE
+		printf	"prefix=@prefix@\n"				>> $PKG_FILE
+		printf	"exec_prefix=@exec_prefix@\n"			>> $PKG_FILE
+		printf	"libdir=@libdir@\n"				>> $PKG_FILE
+		printf	"includedir=@includedir@\n"			>> $PKG_FILE
+		printf	"Name: %s\n"				$REPO	>> $PKG_FILE
+		printf	"URL: %s/%s\n"	$SRC_URI		$REPO	>> $PKG_FILE
+		printf	"Description: <TBD>\n"				>> $PKG_FILE
+		printf	"Version: @%s_VERSION@\n"	$(toupper $REPO)>> $PKG_FILE
+		printf	"Libs:	-L\${libdir} -l%s\n"	${$REPO#lib}	>> $PKG_FILE
+		printf	"Libs.private: @%s_LIBS@\n" 	$(toupper $REPO)>> $PKG_FILE
+		printf	"Cflags: -I\${includedir}\n"			>> $PKG_FILE
+	fi
+}
+
 init_repo ()
 {
 	pushd	$REPO		&>/dev/null
@@ -80,7 +104,7 @@ init_repo ()
 	mkdir	-p		m4
 	mkdir	-p		src/include
 	touch			src/include/config.h.in
-	touch			$REPO.pc.in
+	pkg_config_file
 
 
 	if	! [ -f AUTHORS ] ; then
