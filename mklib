@@ -90,7 +90,7 @@ pkg_config_file ()
 		printf	"URL: %s/%s\n"	$SRC_URI		$REPO	>> $PKG_FILE
 		printf	"Description: <TBD>\n"				>> $PKG_FILE
 		printf	"Version: @%s_VERSION@\n"	$(toupper $REPO)>> $PKG_FILE
-		printf	"Libs:	-L\${libdir} -l%s\n"	${$REPO#lib}	>> $PKG_FILE
+		printf	"Libs:	-L\${libdir} -l%s\n"	${REPO#lib}	>> $PKG_FILE
 		printf	"Libs.private: @%s_LIBS@\n" 	$(toupper $REPO)>> $PKG_FILE
 		printf	"Cflags: -I\${includedir}\n"			>> $PKG_FILE
 	fi
