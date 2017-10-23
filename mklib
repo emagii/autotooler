@@ -139,7 +139,7 @@ init_repo ()
 	echo	"#!/bin/sh"					>	yocto
 	echo	"PREFIX=/usr/local/$REPO"			>>	yocto
 	echo	"sudo	mkdir			\${PREFIX}"	>>	yocto
-	echo	"sudo	chown	$USER:$USER	\${PREFIX}"	>>	yocto
+	echo	"sudo	chown	\$USER:\$USER	\${PREFIX}"	>>	yocto
 	echo	"./configure		--prefix=\${PREFIX}"	>>	yocto
 	chmod	a+x							yocto
 	git	add	yocto
