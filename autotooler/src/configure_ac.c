@@ -14,7 +14,7 @@
 #define CONFIG_PROJECT "libzip_api"
 #define CONFIG_TCP_PORTAL 1
 #define CONFIG_ZIP_V2_VAR "zip-v2"
-#define CONFIG_WORKDIR "${HOME}/projects/InWido/Applications/Homekit/Libraries"
+#define CONFIG_WORKDIR "${HOME}/projects/autotooler"
 #define CONFIG_OPENSSL 1
 #define CONFIG_COPYRIGHT_DATE "2017"
 #define CONFIG_HOMEPAGE "http://www.emagii.com/"
@@ -39,10 +39,15 @@
 #endif
 
 #include	<stdio.h>
+#include	<stdint.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<stdbool.h>
+#include	<ctype.h>
+#include	<assert.h>
 #include	"autoconf.h"
+#include	<malloc.h>
+
 
 #define		CHECK_HEADERS_FILE	"user/user-headers-ac.inc"
 #define		min(a, b)	(a<b?a:b)
@@ -604,6 +609,12 @@ void	configure_ac(void)
 	ac_arg_enable("curlpp", "Include cURLPP", true);
 #endif
 
+#if	defined(CONFIG_FTD2XX)
+	ac_simple("# ==== FTDI D2XX Libraries");
+	ac_arg_with_include ("ftd2xx", "ftd2xx", "FTDI D2XX", "/usr/local/include",F_CXX);
+	ac_arg_with_lib_path("ftd2xx", "ftd2xx", "FTDI D2XX", "/usr/local/lib",F_CXX);
+	ac_arg_enable("ftd2xx", "Include FTD2XX", true);
+#endif
 
 #if	defined(CONFIG_OPENSSL)
 	ac_simple("# ==== OpenSSL Libraries");

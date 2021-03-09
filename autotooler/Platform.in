@@ -1,15 +1,45 @@
+choice
+	prompt "Target Platform"
+	default TARGET_PLATFORM_PC
+
 config	TARGET_PLATFORM_BEAGLEBONE
-	bool
+	bool	"Beaglebone"
 	default	y
 
 config	TARGET_PLATFORM_MT7620
-	bool
+	bool	"MT7620"
 	default	y
 
 config	TARGET_PLATFORM_PC
-	bool
+	bool	"PC"
 	default	y
 
 config	TARGET_PLATFORM_RASPBERRYPI
-	bool
+	bool	"Raspberry-Pi"
 	default	y
+
+endchoice
+
+choice
+	prompt "Operating System"
+	default	CONFIG_OS_LINUX
+
+config	CONFIG_OS_ANDROID
+	bool	"Android"
+
+config	CONFIG_OS_IOS
+	bool	"iOS"
+
+config	CONFIG_OS_LINUX
+	bool	"Linux"
+
+config	CONFIG_OS_MAC_X
+	bool	"Mac OS X"
+
+config	CONFIG_OS_WINDOWS
+	bool	"Windows"
+
+config	CONFIG_OS_OTHER
+	bool	"other"
+
+endchoice

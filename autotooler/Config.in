@@ -114,8 +114,10 @@ config	CONFIG_APP_VERSION
 	default "1.0"
 
 config	CONFIG_APP_EXTRA
-	bool	"Additional Applications"
+	bool	"Build generates more than one binary or library?"
 	default	n
+	help
+	  If the build generates more than one binary, they need to be listed
 
 if	CONFIG_APP_EXTRA
 config	CONFIG_APP_EXTRA_APPS
@@ -182,6 +184,9 @@ config	CONFIG_BOOST
 config	CONFIG_CURL
 	bool	"cURL"
 
+config	CONFIG_FTD2XX
+	bool	"FTDI MPSSE Library (ftd2xx)"
+
 config	CONFIG_OPENSSL
 	bool	"OpenSSL"
 
@@ -200,27 +205,6 @@ source	library/Config.in
 #
 # ===============================================
 menu	"Options"
-menu	"OS Options"
-
-config	CONFIG_OS_ANDROID
-	bool	"Android"
-
-config	CONFIG_OS_IOS
-	bool	"iOS"
-
-config	CONFIG_OS_LINUX
-	bool	"Linux"
-
-config	CONFIG_OS_MAC_X
-	bool	"Mac OS X"
-
-config	CONFIG_OS_WINDOWS
-	bool	"Windows"
-
-config	CONFIG_OS_OTHER
-	bool	"other"
-
-endmenu
 # ===============================================
 
 

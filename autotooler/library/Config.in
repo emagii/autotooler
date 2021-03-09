@@ -1,6 +1,7 @@
 menu	"Check Libraries"
 
 source	library/dl/Config.in
+source	library/ftd2xx/Config.in
 source	library/nsl/Config.in
 source	library/socket/Config.in
 

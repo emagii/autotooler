@@ -36,9 +36,11 @@
 #endif
 
 #include	<stdio.h>
+#include	<stdint.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<stdbool.h>
+#include	<ctype.h>
 #include	<assert.h>
 #include	"autoconf.h"
 #include	<malloc.h>
@@ -375,7 +377,7 @@ void	am_config2(char *app, char	*var, char *value)
 }
 #endif
 
-app_flags(void)
+uint32_t app_flags(void)
 {
 #if	defined(CONFIG_APP)
 	am_config(CONFIG_APP_NAME "_LDFLAGS",			"$(AM_LDFLAGS)");
@@ -393,7 +395,11 @@ app_flags(void)
 
 }
 
-#if	defined(CONFIG_APP)
+#if	defined(CONFIG_APP_EXTRA)
+#ifndef	CONFIG_APP_EXTRA_APPS
+#define	CONFIG_APP_EXTRA_APPS	""
+#endif
+
 const	char	*config_app_extra_apps = CONFIG_APP_EXTRA_APPS;
 
 void	get_extra_apps (void)
@@ -404,7 +410,10 @@ void	get_extra_apps (void)
 	char	**apps;
 
 	len = strlen(config_app_extra_apps);
-
+	if (len == 0) {
+		extra_apps = NULL;
+		return;
+	}
 	config_app_extra_apps_clean = malloc(sizeof(char) * (len + 1));
 	if (config_app_extra_apps_clean) {
 		dst = config_app_extra_apps_clean;
@@ -426,7 +435,7 @@ void	get_extra_apps (void)
 	}
 }
 
-add_apps ()
+void add_apps ()
 {
 	char	**apps = extra_apps;
 	char	*p;
@@ -436,6 +445,10 @@ add_apps ()
 }
 #else
 void	get_extra_apps (void)
+{
+}
+
+void add_apps ()
 {
 }
 #endif
@@ -450,8 +463,15 @@ void	Makefile_am(void)
 	get_extra_apps();
 	am_config("AUTOMAKE_OPTIONS",	"foreign nostdinc subdir-objects");
 	newline();
+#if	0
+	am_config("ACLOCAL_FLAGS",	"-I /usr/share/aclocal");
+	newline();
 	am_config("ACLOCAL_AMFLAGS",	"$(ACLOCAL_FLAGS) -I m4");
 	newline();
+#else
+	am_config("ACLOCAL_AMFLAGS",	"-I m4");
+	newline();
+#endif
 	am_config("AM_CFLAGS","");
 	am_config("AM_LDFLAGS","$(LIBS)");
 	am_cppflags();
@@ -495,6 +515,12 @@ void	Makefile_am(void)
 	am_use_cond("CURL");
 		am_config_add("AM_CFLAGS",	"-DUSE_CURL");
 		am_config_add("LIB_CFLAGS",	"$(CURL_CXXFLAGS)");
+	am_endif();
+#endif
+#if	defined(CONFIG_FTD2XX)
+	am_use_cond("FTD2XX");
+		am_config_add("AM_CFLAGS",	"-DUSE_FTD2XX");
+		am_config_add("LIB_CFLAGS",	"$(FTD2XX_CXXFLAGS)");
 	am_endif();
 #endif
 #if	defined(CONFIG_PTHREAD)

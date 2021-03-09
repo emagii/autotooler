@@ -1,0 +1,5 @@
+menu	"Check ftd2xx"
+config		CONFIG_LIB_FTD2XX_FT_OPEN
+		bool	"ftd2xx"
+		default	n
+endmenu

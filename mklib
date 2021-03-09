@@ -40,18 +40,11 @@ get_repo ()
 {
 	REPO=""
 	for f in $(ls -1) ; do
-		if [ "$f" == "mklib" ] ; then
-			continue;
-		fi
-		if [ "$f" == "autotooler" ] ; then
-			continue;
-		fi
-		if [ "$f" == "README" ] ; then
-			continue;
-		fi
-		if [ -d "$f/.git" ] ; then
-			REPO="$f"
-			break;
+		if [ -d "$f" ] ; then
+			if [ -d "$f/.git" ] ; then
+				REPO="$f"
+				break;
+			fi
 		else
 			continue;
 		fi
@@ -62,8 +55,10 @@ get_repo ()
 	fi
 }
 
+# Add the autotooler subdirectory to target and delete any config files
 init_repo_autotooler ()
 {
+	echo init_repo_autotooler
 	if	[ -d $REPO/autotooler ] ; then
 		echo	"$REPO contains autotooler subdir"
 		DEFCONFIG=$(cd $REPO/autotooler ; find . -name '*_defconfig')
@@ -75,7 +70,6 @@ init_repo_autotooler ()
 		DEFCONFIG=""
 	fi
 }
-
 
 pkg_config_file ()
 {
@@ -98,8 +92,9 @@ pkg_config_file ()
 
 init_repo ()
 {
+	echo init_repo
 	pushd	$REPO		&>/dev/null
-	git config credential.helper 'cache --timeout=36000'
+	add_credentials
 
 	mkdir	-p		m4
 	mkdir	-p		src/include
@@ -115,7 +110,6 @@ init_repo ()
 		git	add	autogen.sh
 		git	commit	-m "Adding autogen.sh" -s
 	fi
-
 	if	! [ -f AUTHORS ] ; then
 		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
 	fi
@@ -124,26 +118,27 @@ init_repo ()
 	touch			INSTALL
 	touch			LICENSE
 	touch			NEWS
-	touch			README
-	git	add	AUTHORS	COPYING	ChangeLog	INSTALL	LICENSE	NEWS	README
-	if $(git	commit	-m "Autotools required files" -s) ; then
-		true
-	fi
+	touch			README.md
+	ls -l autotooler
 
+	git	add	AUTHORS	COPYING	ChangeLog	INSTALL	LICENSE	NEWS	README.md
+	git	commit	-m "Autotools required files" -s
 	if	! [ -f .gitignore ] ; then
 		cp	autotooler/gitignore	.gitignore
 		git	add	.gitignore
 		git	commit -m ".gitignore" -s
 	fi
 
-	echo	"#!/bin/sh"					>	yocto
-	echo	"PREFIX=/usr/local/$REPO"			>>	yocto
-	echo	"sudo	mkdir			\${PREFIX}"	>>	yocto
-	echo	"sudo	chown	\$USER:\$USER	\${PREFIX}"	>>	yocto
-	echo	"./configure		--prefix=\${PREFIX}"	>>	yocto
-	chmod	a+x							yocto
-	git	add	yocto
-	git	commit	-m "yocto ./configure test" -s
+	if [ "1" == "0" ] ; then
+		echo	"#!/bin/sh"					>	test-configure.sh
+		echo	"PREFIX=/usr/local/$REPO"			>>	test-configure.sh
+		echo	"sudo	mkdir			\${PREFIX}"	>>	test-configure.sh
+		echo	"sudo	chown	\$USER:\$USER	\${PREFIX}"	>>	test-configure.sh
+		echo	"./configure		--prefix=\${PREFIX}"	>>	test-configure.sh
+		chmod	a+x							test-configure.sh
+		git	add	test-configure.sh
+		git	commit	-m "test-configure.sh ./configure test" -s
+	fi
 
 	git	add	autotooler
 	git	commit	-m "autotooler default configuration (empty)" -s
@@ -153,19 +148,31 @@ init_repo ()
 	popd				&>/dev/null
 }
 
+relink	()
+{
+	if [ -L "$2" ] ; then
+		echo unlinking "$2"
+		unlink "$2"
+	fi
+	ln	-sf 	"$1"	"$2"
+}
+
 init_links ()
 {
+	echo init_links
 	pushd	autotooler		&>/dev/null
-	ln	-sf 	../$REPO	REPO
+	relink	"../$REPO"	REPO
 	popd				&>/dev/null
+
 	pushd	autotooler/src		&>/dev/null
-	ln	-sf	"../../$REPO/autotooler"		"user"
-	ln	-sf	"../../$REPO"				"REPO"
+	relink	"../../$REPO/autotooler"	"user"
+	relink	"../../$REPO"			"REPO"
 	popd				&>/dev/null
 }
 
 init_config ()
 {
+	echo init_config
 	pushd	autotooler		&>/dev/null
 	CONFIG=.config
 	raw						"HAVE_DOT_CONFIG=y"
