@@ -624,10 +624,29 @@ void	configure_ac(void)
 	ac_arg_with ("openssl", "OPENSSL", "crypto", "OpenSSL", "/usr",F_CC);
 #endif
 
+#if	defined(CONFIG_WESTON)
+	ac_simple("# ==== Weston Libraries");
+	ac_arg_with_include ("weston", "weston", "Weston",               "/usr/include/weston",F_CC);
+	ac_arg_with_include ("libweston", "libweston", "Weston Library", "/usr/include/libweston-3",F_CC);
+	ac_arg_with_lib_path("weston", "weston", "Weston", "/usr/lib/weston",F_CC);
+#endif
+
+#if	defined(CONFIG_LIBEVDEV)
+	ac_simple("# ==== EvDev Libraries");
+	ac_arg_with_include ("evdev", "evdev", "Evdev", "/usr/include/libevdev-1.0",F_CC);
+	ac_arg_with_lib_path("evdev", "evdev", "Evdev", "/usr/lib",F_CC);
+#endif
+
+#if	defined(CONFIG_PIXMAN)
+	ac_simple("# ==== Pixman Libraries");
+	ac_arg_with_include ("pixman", "pixman", "Pixman", "/usr/include/pixman-1",F_CC);
+	ac_arg_with_lib_path("pixman", "pixman", "Pixman", "/usr/lib",F_CC);
+#endif
+
 #if	defined(CONFIG_PTHREAD)
 	ac_simple("# ==== Pthread Libraries");
 	ac_arg_with_include ("pthread", "pthread", "PThread", "/usr/include",F_CC);
-	ac_arg_with_lib_path("pthread", "pthread", "PThread", "/usr/include",F_CC);
+	ac_arg_with_lib_path("pthread", "pthread", "PThread", "/usr/lib",F_CC);
 	ac_arg_enable("pthread", "Include PThreads", true);
 #endif
 
