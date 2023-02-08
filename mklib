@@ -1,4 +1,5 @@
 #!/bin/sh
+YEAR=$(date +%Y)
 
 toupper ()
 {
@@ -103,7 +104,7 @@ init_repo ()
 
 
 	if	! [ -f AUTHORS ] ; then
-		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
+		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "${EMAIL}"	>	AUTHORS
 	fi
 	if ! [ -f autogen.sh ] ; then
 		install	-m 755 ../autotooler/scripts/autogen.sh	autogen.sh
@@ -111,7 +112,7 @@ init_repo ()
 		git	commit	-m "Adding autogen.sh" -s
 	fi
 	if	! [ -f AUTHORS ] ; then
-		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "<${EMAIL}>"	>	AUTHORS
+		printf	"AUTHOR: %s <%s>\n"	"${AUTHOR}" "${EMAIL}"	>	AUTHORS
 	fi
 	touch			ChangeLog
 	touch			COPYING
@@ -186,7 +187,7 @@ init_config ()
 
 	add_config_string	LIBRARY_NAME		"$REPO"
 	add_config_string	LIBRARY_VERSION		"1.0"
-	add_config_string	COPYRIGHT_DATE		"2021"
+	add_config_string	COPYRIGHT_DATE		"${YEAR}"
 	add_config_string	AUTHOR			"${AUTHOR}"
 	add_config_string	AUTHOR_EMAIL		"${EMAIL}"
 	add_config_string	HOMEPAGE		"${HOMEPAGE}"
