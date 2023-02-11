@@ -529,6 +529,16 @@ void	ac_set_version()
 {
 }
 
+void	add_to_CFLAGS(char *s)
+{
+	fprintf(c_ac, "CFLAGS='${CFLAGS} ${%s_CFLAGS}'\n", s);
+}
+
+void	add_to_LIBS(char *s)
+{
+	fprintf(c_ac, "LIBS='${LIBS} ${%s_LIBS}'\n", s);
+}
+
 void	configure_ac(void)
 {
 	c_ac	= fopen("configure.ac", "w");
@@ -628,18 +638,22 @@ void	configure_ac(void)
 	pkg_check_modules("weston", "weston", "3");
 	ac_subst("WESTON_CFLAGS");
 	ac_subst("WESTON_LIBS");
+//	add_to_CFLAGS("weston");
+
 #endif
 
 #if	defined(CONFIG_LIBEVDEV)
 	pkg_check_modules("libevdev", "libevdev", "1.0");
 	ac_subst("LIBEVDEV_CFLAGS");
 	ac_subst("LIBEVDEV_LIBS");
+//	add_to_CFLAGS("libevdev");
 #endif
 
 #if	defined(CONFIG_PIXMAN)
 	pkg_check_modules("PIXMAN", "pixman-1", "0.29.1");
 	ac_subst("PIXMAN_CFLAGS");
 	ac_subst("PIXMAN_LIBS");
+//	add_to_CFLAGS("pixman");
 #endif
 
 #if	defined(CONFIG_PTHREAD)

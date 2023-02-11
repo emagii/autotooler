@@ -48,8 +48,12 @@
 #define	REQUIRED	1
 #define	OPTIONAL	0
 
-#if	!defined(CONFIG_VERSION_INFO)
-#define	CONFIG_VERSION_INFO	"0:0:0"
+#if defined(CONFIG_LIBRARY_VERSION)
+#define	CONFIG_VERSION_INFO	CONFIG_LIBRARY_VERSION
+#endif
+
+#if defined(CONFIG_APP_VERSION)
+#define	CONFIG_VERSION_INFO	CONFIG_APP_VERSION
 #endif
 
 #define		min(a, b)	(a<b?a:b)
@@ -380,13 +384,13 @@ void	am_config2(char *app, char	*var, char *value)
 uint32_t app_flags(void)
 {
 #if	defined(CONFIG_APP)
-	am_config(CONFIG_APP_NAME "_LDFLAGS",			"$(AM_LDFLAGS)");
+	am_config(CONFIG_APP_NAME "_LDFLAGS",			"$(AM_LDFLAGS) $(GENERIC_LDFLAGS)");
 	am_config(CONFIG_APP_NAME "_CFLAGS",			"$(AM_CFLAGS)");
 	am_config(CONFIG_APP_NAME "_CPPFLAGS",			"$(AM_CPPFLAGS)");
 	am_config(CONFIG_APP_NAME "_LDAPP",			"$(LIB_CFLAGS)");
 #endif
 #if	defined(CONFIG_LIBRARY)
-	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)");
+	am_config(CONFIG_LIBRARY_NAME "_la_LDFLAGS",		"$(AM_LDFLAGS)  $(GENERIC_LDFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CFLAGS",		"$(AM_CFLAGS)");
 	am_config(CONFIG_LIBRARY_NAME "_la_CPPFLAGS",		"$(AM_CPPFLAGS)");
 
@@ -479,6 +483,7 @@ void	Makefile_am(void)
 	newline();
 #if	defined(CONFIG_LIBRARY)
 	sanitize_names(CONFIG_LIBRARY_NAME, STRING_LEN-1, library, LIBRARY);
+	am_config("VERSION", CONFIG_LIBRARY_VERSION);
 	am_config2(LIBRARY,"_VERSION", "$(VERSION)");
 	am_config2(LIBRARY,"_LIBS", "$(SLIBS)");
 	am_config("lib_LTLIBRARIES", CONFIG_LIBRARY_NAME ".la");
@@ -499,8 +504,18 @@ void	Makefile_am(void)
 	am_config("pkgconfig_DATA", CONFIG_LIBRARY_NAME ".pc");
 #endif
 	newline();
-	sprintf(version_info, "-version-info %s", CONFIG_VERSION_INFO);
+	{
+		char	version[32];
+		sprintf(version, "%s", CONFIG_VERSION_INFO);
+		for (int i = 0 ; i < strlen(version) ; i++) {
+			if (version[i] == '.') {
+				version[i] = ':';
+			}
+		}
+		sprintf(version_info, "-version-info %s", version);
+	}
 	am_config("VERSION_INFO", version_info);
+	am_config("GENERIC_LDFLAGS", "$(VERSION_INFO)");
 	newline();
 
 	os_select();
