@@ -625,22 +625,21 @@ void	configure_ac(void)
 #endif
 
 #if	defined(CONFIG_WESTON)
-	ac_simple("# ==== Weston Libraries");
-	ac_arg_with_include ("weston", "weston", "Weston",               "/usr/include/weston",F_CC);
-	ac_arg_with_include ("libweston", "libweston", "Weston Library", "/usr/include/libweston-3",F_CC);
-	ac_arg_with_lib_path("weston", "weston", "Weston", "/usr/lib/weston",F_CC);
+	pkg_check_modules("weston", "weston", "3");
+	ac_subst("WESTON_CFLAGS");
+	ac_subst("WESTON_LIBS");
 #endif
 
 #if	defined(CONFIG_LIBEVDEV)
-	ac_simple("# ==== EvDev Libraries");
-	ac_arg_with_include ("evdev", "evdev", "Evdev", "/usr/include/libevdev-1.0",F_CC);
-	ac_arg_with_lib_path("evdev", "evdev", "Evdev", "/usr/lib",F_CC);
+	pkg_check_modules("libevdev", "libevdev", "1.0");
+	ac_subst("LIBEVDEV_CFLAGS");
+	ac_subst("LIBEVDEV_LIBS");
 #endif
 
 #if	defined(CONFIG_PIXMAN)
-	ac_simple("# ==== Pixman Libraries");
-	ac_arg_with_include ("pixman", "pixman", "Pixman", "/usr/include/pixman-1",F_CC);
-	ac_arg_with_lib_path("pixman", "pixman", "Pixman", "/usr/lib",F_CC);
+	pkg_check_modules("PIXMAN", "pixman-1", "0.29.1");
+	ac_subst("PIXMAN_CFLAGS");
+	ac_subst("PIXMAN_LIBS");
 #endif
 
 #if	defined(CONFIG_PTHREAD)
